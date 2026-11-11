@@ -21,6 +21,7 @@ const TABLES = [
   { name: 'grants', label: 'Grants' },
   { name: 'provider_classes', label: 'Florida provider classes' },
   { name: 'documents', label: 'Document list' },
+  { name: 'doc_subfolders', label: 'Document subfolders' },
   { name: 'activity_log', label: 'Activity log' },
   { name: 'profiles', label: 'Team and access' },
 ];
@@ -76,7 +77,7 @@ export default function BackupPage() {
         }
         const folder = d.folder || d.category || 'unfiled';
         const prefix = d.storage_path.split('/')[0].slice(0, 8);
-        root.file(`documents/${folder}/${prefix}_${d.name}`, data);
+        root.file(`documents/${folder}/${d.subpath ? d.subpath + '/' : ''}${prefix}_${d.name}`, data);
         files.included += 1;
       }
       note(`✓ Documents: ${files.included} of ${documents.length} files`);
@@ -91,7 +92,7 @@ export default function BackupPage() {
         '',
         'data/       one CSV per table (opens in Excel or Google Sheets)',
         'data/json/  the same data in JSON, for re-importing into a database',
-        'documents/  every uploaded file, grouped by category',
+        'documents/  every uploaded file, in its folders and subfolders',
         'manifest.json  row and file counts, to confirm the backup is complete',
       ].join('\n'),
     );

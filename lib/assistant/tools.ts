@@ -23,7 +23,7 @@ export const READ_TABLES: Record<string, TableSpec> = {
   spotlight_artists: { label: 'Spotlight artist', cols: ['id', 'name', 'discipline', 'handle', 'age_status', 'outreach_status', 'release_signed_on', 'featured_on', 'mentoring_offered', 'showcase_invite', 'notes'], order: 'name', search: ['name', 'handle', 'notes'] },
   mentees: { label: 'Mentee', cols: ['id', 'name', 'discipline', 'age_status', 'source', 'stage', 'point_mentor_id', 'inquiry_date', 'intake_date', 'match_date', 'outcome', 'notes'], order: 'inquiry_date', search: ['name', 'notes', 'outcome'] },
   mentoring_sessions: { label: 'Mentoring session', cols: ['id', 'session_date', 'mentee_id', 'mentor_id', 'format', 'second_adult', 'minutes', 'notes'], order: 'session_date', search: ['notes'] },
-  documents: { label: 'Document', cols: ['id', 'name', 'folder', 'doc_year', 'size_bytes', 'meeting_id', 'partner_id', 'grant_id', 'class_id', 'created_at'], order: 'created_at', search: ['name', 'folder'] },
+  documents: { label: 'Document', cols: ['id', 'name', 'folder', 'subpath', 'doc_year', 'size_bytes', 'meeting_id', 'partner_id', 'grant_id', 'class_id', 'created_at'], order: 'created_at', search: ['name', 'folder'] },
   activity_log: { label: 'Activity', cols: ['table_name', 'action', 'actor_name', 'summary', 'created_at'], order: 'created_at', search: ['summary', 'actor_name'] },
 };
 
