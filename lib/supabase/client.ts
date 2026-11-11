@@ -1,0 +1,14 @@
+import { createBrowserClient } from '@supabase/ssr';
+import { SUPABASE_URL, SUPABASE_KEY } from '@/lib/env';
+
+let client: ReturnType<typeof createBrowserClient> | null = null;
+
+export function supabaseBrowser() {
+  if (!client) {
+    client = createBrowserClient(
+      SUPABASE_URL,
+      SUPABASE_KEY,
+    );
+  }
+  return client;
+}
