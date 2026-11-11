@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { Row } from '@/lib/types';
 
 export type Column = {
@@ -177,7 +177,20 @@ function Cell({ row, col, editable, onSave }: { row: Row; col: Column; editable:
     onBlur: commit,
   };
 
-  if (col.type === 'textarea') return <textarea rows={1} {...common} />;
+  // Text wraps and the box grows to show everything (phones included). Enter saves single-line fields.
+  if (col.type === 'textarea' || !col.type || col.type === 'text') {
+    return (
+      <AutoGrow
+        {...common}
+        onKeyDown={(e) => {
+          if (col.type !== 'textarea' && e.key === 'Enter') {
+            e.preventDefault();
+            (e.target as HTMLTextAreaElement).blur();
+          }
+        }}
+      />
+    );
+  }
   return (
     <input
       {...common}
@@ -188,6 +201,23 @@ function Cell({ row, col, editable, onSave }: { row: Row; col: Column; editable:
       }}
     />
   );
+}
+
+// A textarea that sizes itself to its content, and re-measures when the screen size changes.
+function AutoGrow(props: React.TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  const fit = () => {
+    const el = ref.current;
+    if (!el || el.offsetParent === null) return; // hidden (the other layout); measure when it shows
+    el.style.height = 'auto';
+    el.style.height = `${el.scrollHeight + 2}px`;
+  };
+  useLayoutEffect(fit, [props.value]);
+  useEffect(() => {
+    window.addEventListener('resize', fit);
+    return () => window.removeEventListener('resize', fit);
+  }, []);
+  return <textarea ref={ref} rows={1} {...props} onInput={fit} style={{ overflow: 'hidden', resize: 'none' }} />;
 }
 
 function toText(v: any): string {
