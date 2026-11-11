@@ -301,20 +301,20 @@ export default function DocumentsPage() {
           )}
 
           {!term && childFolders.length > 0 && (
-            <ul className="mb-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="mb-3 grid gap-2 lg:grid-cols-2">
               {childFolders.map((p) => {
                 const d = dropProps({ folder, path: p });
                 const n = countIn(folder, p);
                 return (
                   <li key={p} onDragOver={d.onDragOver} onDragLeave={d.onDragLeave} onDrop={d.onDrop}
-                    className={`group flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${d.ring ? 'border-brand-500 bg-brand-100 ring-2 ring-brand-500' : 'border-slate-200 hover:bg-slate-50'}`}>
-                    <button className="flex min-w-0 flex-1 items-center gap-2 text-left" onClick={() => open(folder, p)}>
+                    className={`group flex items-start gap-2 rounded-lg border px-3 py-2.5 text-sm ${d.ring ? 'border-brand-500 bg-brand-100 ring-2 ring-brand-500' : 'border-slate-200 hover:bg-slate-50'}`}>
+                    <button className="flex min-w-0 flex-1 items-start gap-2 text-left" onClick={() => open(folder, p)} title={p.split('/').pop()}>
                       <span aria-hidden>📁</span>
-                      <span className="truncate font-medium">{p.split('/').pop()}</span>
-                      <span className="text-xs text-slate-400">{n}</span>
+                      <span className="min-w-0 flex-1 break-words font-medium leading-snug">{p.split('/').pop()}</span>
+                      <span className="shrink-0 pt-0.5 text-xs text-slate-400">{n} file{n === 1 ? '' : 's'}</span>
                     </button>
                     {canEdit && (
-                      <span className="flex shrink-0 gap-1 opacity-60 group-hover:opacity-100">
+                      <span className="flex shrink-0 gap-1 pt-0.5 opacity-60 group-hover:opacity-100">
                         <button className="rounded px-1 text-xs text-slate-500 hover:bg-white" title="Rename" onClick={() => renameFolder(p)}>Rename</button>
                         {n === 0 && <button className="rounded px-1 text-xs text-red-600 hover:bg-white" title="Delete empty folder" onClick={() => deleteFolder(p)}>Delete</button>}
                       </span>
