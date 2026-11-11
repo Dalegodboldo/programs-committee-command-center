@@ -13,7 +13,7 @@ const SAFETY = [
   'No signed media release, no post.',
   'First names only in anything public. No school, hometown or age.',
   'Two adults in every mentoring session: the guardian or a second AITCF adult.',
-  'Background check and signed code of conduct before any session.',
+  'Background check (through Checkr) and signed code of conduct before any session.',
   'A guardian travels with every minor; signed consent and medical form for showcases.',
 ];
 const PATH = [

@@ -4,10 +4,10 @@ import { useState } from 'react';
 import EditableTable, { type Column } from '@/components/EditableTable';
 import ErrorBar from '@/components/ErrorBar';
 import FilesCell from '@/components/FilesCell';
-import Tabs, { Pill } from '@/components/Tabs';
+import Tabs, { ExternalButton, Pill } from '@/components/Tabs';
 import { useCan } from '@/components/RoleContext';
 import { useLiveTable } from '@/lib/useLiveTable';
-import { AGE_STATUS, BACKGROUND_CHECK, DISCIPLINE, MENTEE_SOURCE, MENTEE_STAGE, SESSION_FORMAT } from '@/lib/options';
+import { AGE_STATUS, BACKGROUND_CHECK, CHECKR_URL, DISCIPLINE, MENTEE_SOURCE, MENTEE_STAGE, SESSION_FORMAT } from '@/lib/options';
 import { today } from '@/lib/dates';
 import type { Row } from '@/lib/types';
 
@@ -144,7 +144,10 @@ function Mentors({ t, mentees }: { t: ReturnType<typeof useLiveTable>; mentees: 
   ];
   return (
     <>
-      <p className="mb-3 text-sm text-slate-500">A mentor is ready once their background check is on file and they&apos;ve signed the code of conduct. Background check reports go in Documents › Background Checks (admins only).</p>
+      <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+        <p className="max-w-2xl text-sm text-slate-500">A mentor is ready once their background check is on file and they&apos;ve signed the code of conduct. AITCF runs background checks through Checkr. Save each report in Documents › Background Checks (admins only).</p>
+        {canEdit && <ExternalButton href={CHECKR_URL} title="Opens the Checkr dashboard in a new tab. Sign in with AITCF's Checkr account.">Open Checkr</ExternalButton>}
+      </div>
       <ErrorBar error={t.error} onClose={() => t.setError(null)} />
       <EditableTable rows={t.rows} columns={cols} canEdit={canEdit} onUpdate={t.update} onDelete={t.remove}
         onAdd={() => t.insert({ name: 'New mentor' })} addLabel="Add mentor" />

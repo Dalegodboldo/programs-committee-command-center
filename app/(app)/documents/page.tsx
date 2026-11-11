@@ -2,11 +2,12 @@
 
 import { useMemo, useRef, useState } from 'react';
 import ErrorBar from '@/components/ErrorBar';
+import { ExternalButton } from '@/components/Tabs';
 import DocPreview from '@/components/DocPreview';
 import { useCan, useProfile } from '@/components/RoleContext';
 import { useLiveTable } from '@/lib/useLiveTable';
 import { supabaseBrowser } from '@/lib/supabase/client';
-import { ACCESS_LABEL, DOC_FOLDERS, DOC_LINKS, folderLabel } from '@/lib/options';
+import { ACCESS_LABEL, CHECKR_URL, DOC_FOLDERS, DOC_LINKS, folderLabel } from '@/lib/options';
 import { fileSize, filesFromDrop, isInside, isJunk, joinPath, uploadItems } from '@/lib/docs';
 import type { Row } from '@/lib/types';
 
@@ -243,6 +244,7 @@ export default function DocumentsPage() {
             </div>
             {canUploadHere && (
               <div className="flex flex-wrap gap-2">
+                {folder === 'screening' && <ExternalButton href={CHECKR_URL} title="Opens the Checkr dashboard in a new tab">Open Checkr</ExternalButton>}
                 {folder !== 'all' && <button className="btn-ghost" onClick={() => setNaming(!naming)} disabled={busy}>+ New folder</button>}
                 <label className={`btn-ghost cursor-pointer ${busy ? 'pointer-events-none opacity-50' : ''}`}>
                   Upload a folder

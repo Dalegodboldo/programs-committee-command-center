@@ -41,6 +41,9 @@ export const MENTEE_SOURCE = opts([
   ['Florida provider class', 'Florida provider class'], ['Ambassador', 'Ambassador'], ['Referral', 'Referral'], ['Other', 'Other'],
 ]);
 export const SESSION_FORMAT = opts([['zoom', 'Zoom'], ['in_person', 'In person'], ['phone', 'Phone']]);
+// Where AITCF runs mentor background checks.
+export const CHECKR_URL = 'https://dashboard.checkr.com/home';
+
 export const BACKGROUND_CHECK = opts([['not_started', 'Not started'], ['requested', 'Requested'], ['on_file', 'On file'], ['expired', 'Expired']]);
 
 export const PARTNER_KIND = opts([
@@ -73,7 +76,7 @@ export const DOC_FOLDERS = [
   { value: 'releases', label: 'Releases & Consent', icon: '✍️', hint: 'Signed media releases, guardian consent and medical forms', access: 'team' },
   { value: 'mentoring', label: 'Mentoring & Intake', icon: '🤝', hint: 'Intake forms, mentor guidelines, session notes', access: 'team' },
   { value: 'safeguarding', label: 'Safeguarding Policies', icon: '🛡️', hint: 'Code of conduct, two-adult rule, child safety policy', access: 'everyone' },
-  { value: 'screening', label: 'Background Checks', icon: '🔐', hint: 'Mentor background check reports', access: 'admin' },
+  { value: 'screening', label: 'Background Checks', icon: '🔐', hint: 'Mentor background check reports, downloaded from Checkr', access: 'admin' },
   { value: 'partners', label: 'Partners & Schools', icon: '🏫', hint: 'Partner agreements, MOUs, program info from schools', access: 'everyone' },
   { value: 'grants', label: 'Grants & Funding', icon: '🏛️', hint: 'Applications, award letters, grant reports, sponsor decks', access: 'everyone' },
   { value: 'florida', label: 'Florida Provider', icon: '🌴', hint: 'Provider application, certificate of use, class syllabi', access: 'everyone' },
