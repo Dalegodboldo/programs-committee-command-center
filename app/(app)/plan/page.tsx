@@ -122,7 +122,7 @@ export default function PlanPage() {
       </section>
 
       <section className="grid gap-4 lg:grid-cols-2">
-        <div className="card border-brand-700 bg-brand-700 text-white">
+        <div className="rounded-xl bg-brand-700 p-5 text-white shadow-sm">
           <h2 className="mb-3 font-semibold">🛡️ Safety rules, no exceptions</h2>
           <ol className="space-y-2 text-sm">
             {SAFETY.map((s, i) => (

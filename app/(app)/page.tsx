@@ -81,7 +81,7 @@ export default function Overview() {
       </nav>
 
       <section className="grid gap-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
-        <div className="card flex flex-col justify-between gap-3 border-brand-700 bg-brand-700 text-white">
+        <div className="flex flex-col justify-between gap-3 rounded-xl bg-brand-700 p-5 text-white shadow-sm">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-gold-400">Next meeting</p>
             {nextMeeting ? (
