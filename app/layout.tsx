@@ -5,7 +5,7 @@ import type { Metadata } from 'next';
 const site = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://programs-committee.alwaysintheclub.org';
 
 const title = 'Programs Committee Command Center';
-const description = 'Always In The Club Foundation. Action items, meetings, Spotlight, mentoring and documents for the Programs Committee. Private, committee members only.';
+const description = 'Always In The Club Foundation. Action items, meetings, Spotlight, mentoring and documents for the Programs Committee. Private, board members only.';
 
 export const metadata: Metadata = {
   metadataBase: new URL(site),
