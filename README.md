@@ -1,5 +1,7 @@
 # AITCF Programs Committee Command Center
 
+Live at https://programs-committee.alwaysintheclub.org
+
 Private, password-protected dashboard for the Always In The Club Foundation Programs Committee: everything the committee needs to run its youth programs between monthly meetings.
 
 - **Overview:** next meeting, the December scorecard, overdue and upcoming items, "my action items", progress by workstream, recent activity.
