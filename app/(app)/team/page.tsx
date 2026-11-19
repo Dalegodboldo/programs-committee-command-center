@@ -166,7 +166,8 @@ const MATRIX: { area: string; rows: [string, string, string, string][] }[] = [
     rows: [
       ['Ask questions, get summaries, search documents (only what that role can see)', 'Y', 'Y', 'Y'],
       ['Small edits to action items, meetings, decisions, questions, goals, partners, grants and classes (after Confirm)', 'Y', 'Y', 'N'],
-      ['Change people, access, files, code or settings', 'N', 'N', 'N'],
+      ['Change the app design: colors, names, menu, Overview layout (after Confirm)', 'Y', 'N', 'N'],
+      ['Change people, access, files or code', 'N', 'N', 'N'],
     ],
   },
   {
@@ -176,6 +177,7 @@ const MATRIX: { area: string; rows: [string, string, string, string][] }[] = [
       ['Change anyone\'s access level', 'Y', 'N', 'N'],
       ['Test email alerts', 'Y', 'N', 'N'],
       ['Back up everything (export)', 'Y', 'N', 'N'],
+      ['Change the app design on the Design page', 'Y', 'N', 'N'],
     ],
   },
 ];

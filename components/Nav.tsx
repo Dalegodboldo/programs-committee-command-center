@@ -5,6 +5,8 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { supabaseBrowser } from '@/lib/supabase/client';
 import { visibleLinks } from '@/lib/nav';
+import { arrangeLinks } from '@/lib/settings';
+import { useSettings } from '@/components/SettingsContext';
 import { useProfile } from './RoleContext';
 
 const ROLE_LABEL: Record<string, string> = { admin: 'Admin', member: 'Committee member', viewer: 'Viewer' };
@@ -25,7 +27,8 @@ export default function Nav() {
   }, [profile.role, path]);
   useEffect(() => setOpen(false), [path]);
 
-  const links = visibleLinks(profile.role);
+  const { settings } = useSettings();
+  const links = arrangeLinks(visibleLinks(profile.role), settings);
   const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
   const badge = (href: string) => href === '/team' && pending > 0 && (
     <span className="ml-2 rounded-full bg-amber-500 px-1.5 text-xs font-semibold text-white">{pending}</span>
@@ -51,8 +54,8 @@ export default function Nav() {
         <Link href="/" className="flex items-center gap-2">
           <img src="/aitcf-seal.png" alt="" className="h-8 w-8" />
           <span className="leading-tight">
-            <span className="block text-sm font-semibold">Programs Committee</span>
-            <span className="block text-[11px] text-slate-500">{current?.label ?? 'Command Center'}</span>
+            <span className="block text-sm font-semibold">{settings.appName}</span>
+            <span className="block text-[11px] text-slate-500">{current?.label ?? settings.appSubtitle}</span>
           </span>
         </Link>
         <button className="relative rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium" onClick={() => setOpen(true)} aria-label="Open menu">
@@ -84,8 +87,8 @@ export default function Nav() {
       <aside className="hidden shrink-0 border-r border-slate-200 bg-white print:hidden md:block md:min-h-screen md:w-60">
         <div className="p-4">
           <img src="/aitcf-seal.png" alt="" className="mb-2 h-10 w-10" />
-          <p className="font-semibold leading-tight">Programs Committee</p>
-          <p className="text-xs text-slate-500">Command Center</p>
+          <p className="font-semibold leading-tight">{settings.appName}</p>
+          {settings.appSubtitle && <p className="text-xs text-slate-500">{settings.appSubtitle}</p>}
         </div>
         <nav className="flex flex-col gap-1 px-2">
           {links.map((l) => (

@@ -12,7 +12,7 @@ const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-5-5';
 const DAILY_LIMIT = Number(process.env.ASSISTANT_DAILY_LIMIT || 60);
 const ROLE_LABEL: Record<string, string> = { admin: 'admin', member: 'committee member', viewer: 'viewer (read-only)' };
 
-function systemPrompt(name: string, role: string, canEdit: boolean) {
+function systemPrompt(name: string, role: string, canEdit: boolean, isAdmin: boolean) {
   const today = new Date().toLocaleDateString('en-US', { timeZone: 'America/Los_Angeles', weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
   return `You are Ask Claude, the assistant inside the AITCF Programs Committee Command Center.
 
@@ -28,7 +28,12 @@ ${
     ? `Small edits: you may propose changes to action items, meetings, decisions, open questions, goal progress, partners, grants and Florida classes, and add new action items, meetings, decisions, open questions, partners, grants or classes. Proposals are only saved when the person clicks Confirm, so after proposing, say what you proposed and ask them to confirm. Propose one change per record; group related changes in the same reply.`
     : `This person has read-only access: you can't propose any changes for them. If they ask for one, say an admin or committee member can make it.`
 }
-Never: change people, access or roles, uploaded files, the Spotlight roster, mentees or sessions, or app code and settings; delete anything; or claim you did something you didn't.
+${
+  isAdmin
+    ? `App design (admins only): you can also change how the app looks with propose_design_change: the main and highlight colors, app name and subtitle, the Overview welcome line, an announcement banner at the top of the Overview, the menu's order, names and which pages show, and the order and visibility of the Overview blocks. Call get_design_settings first. For colors, pick specific hex values and keep the main color dark enough for white text. Changes apply for everyone as soon as the admin clicks Confirm, and they can be undone on the Design page. You can't change layouts, add pages or features, or edit code; if asked, say that needs a code change outside the app.`
+    : ''
+}
+Never: change people, access or roles, uploaded files, the Spotlight roster, mentees or sessions, or app code${isAdmin ? '' : ' and design settings'}; delete anything; or claim you did something you didn't.
 
 Mentee, family and artist details are private and many involve minors: use them only to answer the person you're talking with, refer to minors by first name, and never put contact details in anything meant for outside readers.
 
@@ -47,6 +52,7 @@ export async function POST(request: Request) {
   const { data: me } = await supabase.from('profiles').select('full_name, email, role').eq('id', user.id).single();
   if (!me?.role) return NextResponse.json({ error: 'No access.' }, { status: 403 });
   const canEdit = me.role === 'admin' || me.role === 'member';
+  const isAdmin = me.role === 'admin';
 
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) return NextResponse.json({ error: "Ask Claude isn't switched on yet. An admin needs to add ANTHROPIC_API_KEY in Vercel." });
@@ -67,8 +73,8 @@ export async function POST(request: Request) {
 
   const messages: any[] = history.map((m) => ({ role: m.role, content: m.content }));
   const proposals: Proposal[] = [];
-  const tools = toolDefinitions(canEdit);
-  const system = systemPrompt(me.full_name || me.email || 'a team member', me.role, canEdit);
+  const tools = toolDefinitions(canEdit, isAdmin);
+  const system = systemPrompt(me.full_name || me.email || 'a team member', me.role, canEdit, isAdmin);
   let usageIn = 0;
   let usageOut = 0;
   let reply = '';
@@ -98,7 +104,7 @@ export async function POST(request: Request) {
       for (const c of calls) {
         let out: string;
         try {
-          out = await runTool(c.name, c.input, { supabase, canEdit, proposals });
+          out = await runTool(c.name, c.input, { supabase, canEdit, isAdmin, proposals });
         } catch (e: any) {
           out = `Error: ${e?.message ?? e}`;
         }

@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useLiveTable } from '@/lib/useLiveTable';
 import { useProfile } from '@/components/RoleContext';
 import { visibleLinks } from '@/lib/nav';
+import { arrangeLinks } from '@/lib/settings';
+import { useSettings } from '@/components/SettingsContext';
 import { Pill, Progress } from '@/components/Tabs';
 import { addDays, daysUntil, longDate, relative, shortDate, today } from '@/lib/dates';
 import type { Row } from '@/lib/types';
@@ -11,6 +13,7 @@ import { goalMet } from '@/lib/goals';
 
 export default function Overview() {
   const profile = useProfile();
+  const { settings } = useSettings();
   const actions = useLiveTable('action_items', { orderBy: 'due_date' });
   const meetings = useLiveTable('meetings', { orderBy: 'meeting_date' });
   const goals = useLiveTable('goals', { orderBy: 'sort_order' });
@@ -58,28 +61,9 @@ export default function Overview() {
 
   const recent = [...activity.rows].sort((a, b) => (a.created_at < b.created_at ? 1 : -1)).slice(0, 10);
 
-  return (
-    <div className="space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold">Welcome{firstName ? `, ${firstName}` : ''}</h1>
-          <p className="text-sm text-slate-500">Programs Committee Command Center. Everything here updates live.</p>
-        </div>
-      </header>
-
-      {/* Phones: every section one tap away */}
-      <nav className="grid grid-cols-2 gap-2 md:hidden" aria-label="Sections">
-        {visibleLinks(profile.role).filter((l) => l.href !== '/').map((l) => (
-          <Link key={l.href} href={l.href} className="card flex items-center gap-2 p-3 active:bg-slate-50">
-            <span className="text-2xl">{l.icon}</span>
-            <span className="min-w-0">
-              <span className="block text-sm font-semibold leading-tight">{l.label}</span>
-              <span className="block truncate text-[11px] text-slate-500">{l.hint}</span>
-            </span>
-          </Link>
-        ))}
-      </nav>
-
+  // The Overview's main blocks; admins choose their order and which show on the Design page.
+  const blocks = {
+    meeting: (
       <section className="grid gap-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
         <div className="flex flex-col justify-between gap-3 rounded-xl bg-brand-700 p-5 text-white shadow-sm">
           <div>
@@ -120,14 +104,16 @@ export default function Overview() {
           </ul>
         </div>
       </section>
-
+    ),
+    stats: (
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Stat label="Open action items" value={String(open.length)} sub={`${done} done of ${actions.rows.length}`} href="/actions" />
         <Stat label="Overdue" value={String(overdue.length)} sub={overdue.length ? 'Past their due date' : 'Nothing late'} href="/actions?view=overdue" warn={overdue.length > 0} />
         <Stat label="Due in the next 7 days" value={String(dueSoon.length)} sub={`Through ${shortDate(weekOut)}`} href="/actions?view=week" />
         <Stat label="Open questions" value={String(openQs.length)} sub="Waiting on a committee decision" href="/meetings?tab=questions" />
       </section>
-
+    ),
+    lists: (
       <section className="grid gap-4 lg:grid-cols-2">
         <div className="card">
           <div className="mb-3 flex items-center justify-between">
@@ -163,7 +149,8 @@ export default function Overview() {
           )}
         </div>
       </section>
-
+    ),
+    progress: (
       <section className="grid gap-4 lg:grid-cols-2">
         <div className="card">
           <h2 className="mb-3 font-semibold">Progress by workstream</h2>
@@ -195,6 +182,38 @@ export default function Overview() {
           )}
         </div>
       </section>
+    ),
+  };
+
+  return (
+    <div className="space-y-6">
+      <header className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold">Welcome{firstName ? `, ${firstName}` : ''}</h1>
+          {settings.welcome && <p className="text-sm text-slate-500">{settings.welcome}</p>}
+        </div>
+      </header>
+
+      {settings.announcement && (
+        <div className="whitespace-pre-line rounded-xl border border-gold-400 bg-gold-50 px-4 py-3 text-sm text-gold-800">{settings.announcement}</div>
+      )}
+
+      {/* Phones: every section one tap away */}
+      <nav className="grid grid-cols-2 gap-2 md:hidden" aria-label="Sections">
+        {arrangeLinks(visibleLinks(profile.role), settings).filter((l) => l.href !== '/').map((l) => (
+          <Link key={l.href} href={l.href} className="card flex items-center gap-2 p-3 active:bg-slate-50">
+            <span className="text-2xl">{l.icon}</span>
+            <span className="min-w-0">
+              <span className="block text-sm font-semibold leading-tight">{l.label}</span>
+              <span className="block truncate text-[11px] text-slate-500">{l.hint}</span>
+            </span>
+          </Link>
+        ))}
+      </nav>
+
+      {settings.overviewOrder.filter((k) => !settings.overviewHidden.includes(k)).map((k) => (
+        <div key={k}>{blocks[k as keyof typeof blocks]}</div>
+      ))}
     </div>
   );
 }
@@ -231,5 +250,5 @@ const noun = (t: string) =>
   ({
     meetings: 'a meeting', action_items: 'an action item', decisions: 'a decision', open_questions: 'an open question', goals: 'a goal',
     spotlight_artists: 'a Spotlight artist', content_posts: 'a Spotlight post', mentors: 'a mentor', mentees: 'a mentee',
-    mentoring_sessions: 'a mentoring session', partners: 'a partner', grants: 'a grant', provider_classes: 'a Florida class', documents: 'a document',
+    mentoring_sessions: 'a mentoring session', partners: 'a partner', grants: 'a grant', provider_classes: 'a Florida class', documents: 'a document', app_settings: 'the app design',
   } as Record<string, string>)[t] ?? t;

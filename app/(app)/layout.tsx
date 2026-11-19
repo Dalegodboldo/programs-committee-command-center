@@ -4,6 +4,8 @@ import { RoleProvider } from '@/components/RoleContext';
 import Nav from '@/components/Nav';
 import RequestAgain from '@/components/RequestAgain';
 import AskClaude from '@/components/AskClaude';
+import { SettingsProvider } from '@/components/SettingsContext';
+import { cssVarsText, normalize } from '@/lib/settings';
 import type { Profile } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
@@ -46,8 +48,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     );
   }
 
+  // Design settings (colors, names, menu). If the table isn't there yet, the defaults apply.
+  const { data: row } = await supabase.from('app_settings').select('settings').eq('id', 'site').maybeSingle();
+  const settings = normalize(row?.settings);
+
   return (
     <RoleProvider profile={profile}>
+      <SettingsProvider initial={settings}>
+      <style dangerouslySetInnerHTML={{ __html: cssVarsText(settings) }} />
       <div className="min-h-screen md:flex">
         <Nav />
         <main className="min-w-0 flex-1 p-4 pb-24 md:p-8 md:pb-8 print:p-0">
@@ -55,6 +63,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </main>
       </div>
       <AskClaude />
+      </SettingsProvider>
     </RoleProvider>
   );
 }

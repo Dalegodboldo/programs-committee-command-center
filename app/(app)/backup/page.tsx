@@ -23,6 +23,7 @@ const TABLES = [
   { name: 'documents', label: 'Document list' },
   { name: 'doc_subfolders', label: 'Document subfolders' },
   { name: 'activity_log', label: 'Activity log' },
+  { name: 'app_settings', label: 'App design settings' },
   { name: 'profiles', label: 'Team and access' },
 ];
 

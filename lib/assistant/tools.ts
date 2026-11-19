@@ -1,4 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { NAV_LINKS } from '@/lib/nav';
+import { OVERVIEW_BLOCKS, SETTING_LABELS, applyPatch, describeSetting, normalize, pairWarning, validatePatch, type Settings } from '@/lib/settings';
 import { getDocumentText } from './extract';
 
 // ---------------------------------------------------------------------------
@@ -107,7 +109,7 @@ export function validateChange(table: string, values: Record<string, unknown>, c
 }
 
 export type Proposal = {
-  kind: 'update' | 'create';
+  kind: 'update' | 'create' | 'design';
   table: string;
   id?: string;
   label: string;
@@ -121,7 +123,7 @@ export type Proposal = {
 // Tool definitions sent to Claude
 // ---------------------------------------------------------------------------
 
-export function toolDefinitions(canEdit: boolean) {
+export function toolDefinitions(canEdit: boolean, isAdmin = false) {
   const tables = Object.keys(READ_TABLES);
   const tools: any[] = [
     {
@@ -181,6 +183,35 @@ export function toolDefinitions(canEdit: boolean) {
       },
     );
   }
+  if (isAdmin) {
+    tools.push({
+      name: 'propose_design_change',
+      description:
+        "Admins only. Propose a change to the app's design settings: colors, app name, welcome line, announcement banner, menu order/names/visibility, and the order and visibility of Overview blocks. " +
+        'Send only the settings that change. Nothing is saved until the admin clicks Confirm; then it applies for everyone right away. Call get_design_settings first to see current values.',
+      input_schema: {
+        type: 'object',
+        properties: {
+          changes: {
+            type: 'object',
+            description:
+              'Any of: primary (hex, dark enough for white text), accent (hex), appName (max 40), appSubtitle (max 40), welcome (max 200), announcement (max 300, "" removes it), ' +
+              `navOrder (full list of page addresses: ${NAV_LINKS.map((l) => l.href).join(', ')}), navHidden (addresses to hide; /, /team and /design can't be hidden), ` +
+              'navLabels (map of address to new name, "" restores the default), ' +
+              `overviewOrder (full list: ${OVERVIEW_BLOCKS.map((b) => b.key).join(', ')}), overviewHidden (block keys to hide).`,
+            additionalProperties: true,
+          },
+          reason: { type: 'string', description: 'One short line on why.' },
+        },
+        required: ['changes'],
+      },
+    });
+    tools.push({
+      name: 'get_design_settings',
+      description: "Admins only. Read the app's current design settings, with the menu pages and Overview blocks they refer to.",
+      input_schema: { type: 'object', properties: {} },
+    });
+  }
   return tools;
 }
 
@@ -195,7 +226,7 @@ const clean = (s: string) => s.replace(/[,()*%\\:]/g, ' ').trim().slice(0, 100);
 export async function runTool(
   name: string,
   input: any,
-  ctx: { supabase: SupabaseClient; canEdit: boolean; proposals: Proposal[] },
+  ctx: { supabase: SupabaseClient; canEdit: boolean; isAdmin?: boolean; proposals: Proposal[] },
 ): Promise<string> {
   const { supabase } = ctx;
 
@@ -284,6 +315,36 @@ export async function runTool(
       reason: input.reason ? String(input.reason).slice(0, 300) : undefined,
     });
     return 'Proposal shown to the user with Confirm and Skip buttons. It is NOT saved yet; tell them to confirm it.';
+  }
+
+  if (name === 'get_design_settings' || name === 'propose_design_change') {
+    if (!ctx.isAdmin) return 'Only admins can see or change the app design.';
+    const { data } = await supabase.from('app_settings').select('settings').eq('id', 'site').maybeSingle();
+    const current = normalize(data?.settings);
+    if (name === 'get_design_settings') {
+      return JSON.stringify({
+        settings: current,
+        pages: NAV_LINKS.map((l) => ({ address: l.href, default_name: l.label, admin_only: !!(l as any).adminOnly })),
+        overview_blocks: OVERVIEW_BLOCKS,
+      });
+    }
+    const check = validatePatch(input.changes);
+    if (!check.ok) return `Not allowed: ${check.error}`;
+    const next = applyPatch(current, check.patch);
+    const keys = (Object.keys(check.patch) as (keyof Settings)[]).filter((k) => JSON.stringify(current[k]) !== JSON.stringify(next[k]));
+    if (!keys.length) return 'Those settings already have those values. Nothing to change.';
+    ctx.proposals.push({
+      kind: 'design',
+      table: 'app_settings',
+      id: 'site',
+      label: 'App design',
+      title: keys.map((k) => SETTING_LABELS[k]).join(', '),
+      changes: keys.map((k) => ({ field: SETTING_LABELS[k], before: describeSetting(k, current[k]), after: describeSetting(k, next[k]) })),
+      values: check.patch,
+      reason: input.reason ? String(input.reason).slice(0, 300) : undefined,
+    });
+    const warn = pairWarning(next);
+    return 'Design proposal shown to the admin with Confirm and Skip buttons. It is NOT saved yet; tell them to confirm it.' + (warn ? ` Readability note to pass on: ${warn}` : '');
   }
 
   return 'Unknown tool.';

@@ -9,6 +9,7 @@ export const NAV_LINKS = [
   { href: '/partners', label: 'Partners & funding', icon: '🏛️', hint: 'Partners, grants, Florida classes' },
   { href: '/documents', label: 'Documents', icon: '🗂️', hint: 'Files by folder' },
   { href: '/team', label: 'Team', icon: '👥', hint: 'Access and roles' },
+  { href: '/design', label: 'Design', icon: '🎨', hint: 'Colors, names, menu', adminOnly: true },
   { href: '/backup', label: 'Backup', icon: '💾', hint: 'Export everything', adminOnly: true },
 ] as const;
 

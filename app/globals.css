@@ -26,3 +26,6 @@ body { @apply bg-slate-50 text-slate-900 antialiased; }
 .md code { background: #f1f5f9; padding: 0 0.2rem; border-radius: 0.2rem; }
 
 @media print { body { background: white !important; } }
+
+/* Default colors (navy and gold). Admins can change them on the Design page. */
+:root { --brand-50: 241 242 244; --brand-100: 223 225 230; --brand-500: 95 106 128; --brand-600: 50 63 92; --brand-700: 27 42 74; --brand-900: 15 23 41; --gold-50: 253 246 236; --gold-100: 250 237 216; --gold-400: 232 163 61; --gold-600: 181 127 48; --gold-800: 128 90 34; }

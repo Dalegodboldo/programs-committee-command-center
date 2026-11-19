@@ -6,7 +6,7 @@ import remarkGfm from 'remark-gfm';
 import { useCan } from '@/components/RoleContext';
 
 type Proposal = {
-  kind: 'update' | 'create';
+  kind: 'update' | 'create' | 'design';
   table: string;
   id?: string;
   label: string;
@@ -20,7 +20,12 @@ type Proposal = {
 type Msg = { role: 'user' | 'assistant'; content: string; proposals?: Proposal[]; error?: boolean };
 
 const STORE = 'biff-ask-claude';
-const show = (v: any) => (v === null || v === undefined || v === '' ? '(empty)' : v === true ? 'Yes' : v === false ? 'No' : String(v));
+const show = (v: any) => {
+  const text = v === null || v === undefined || v === '' ? '(empty)' : v === true ? 'Yes' : v === false ? 'No' : String(v);
+  if (/^#[0-9a-f]{6}$/i.test(text))
+    return <span className="inline-flex items-center gap-1"><span className="inline-block h-3 w-3 rounded-sm border border-slate-300 align-middle" style={{ background: text }} />{text}</span>;
+  return text;
+};
 const nice = (f: string) => f.replace(/_/g, ' ');
 
 export default function AskClaude() {
@@ -158,14 +163,14 @@ export default function AskClaude() {
                 {m.proposals?.map((p, pi) => (
                   <div key={pi} className="mt-2 rounded-xl border border-amber-300 bg-amber-50 p-3">
                     <p className="text-xs font-semibold uppercase tracking-wide text-amber-800">
-                      {p.kind === 'create' ? `Add ${p.label.toLowerCase()}` : `Change ${p.label.toLowerCase()}`}
+                      {p.kind === 'create' ? `Add ${p.label.toLowerCase()}` : p.kind === 'design' ? 'Change the app design' : `Change ${p.label.toLowerCase()}`}
                     </p>
                     <p className="font-medium">{p.title}</p>
                     <ul className="mt-1 space-y-0.5 text-slate-700">
                       {p.changes.map((c) => (
                         <li key={c.field}>
                           <span className="text-slate-500">{nice(c.field)}:</span>{' '}
-                          {p.kind === 'update' && <><span className="line-through decoration-slate-400">{show(c.before)}</span> → </>}
+                          {p.kind !== 'create' && <><span className="line-through decoration-slate-400">{show(c.before)}</span> → </>}
                           <b>{show(c.after)}</b>
                         </li>
                       ))}

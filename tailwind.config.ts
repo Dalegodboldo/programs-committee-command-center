@@ -5,8 +5,9 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        brand: { 50: '#eef2f9', 100: '#dce4f2', 500: '#3b5185', 600: '#1f3360', 700: '#1b2a4a', 900: '#0f1830' },
-        gold: { 50: '#fdf6e9', 100: '#fbefd9', 400: '#e8a33d', 600: '#b9771a', 800: '#8a5a10' },
+        // Colors come from CSS variables so admins can change them on the Design page (lib/settings.ts).
+        brand: Object.fromEntries([50, 100, 500, 600, 700, 900].map((n) => [n, `rgb(var(--brand-${n}) / <alpha-value>)`])),
+        gold: Object.fromEntries([50, 100, 400, 600, 800].map((n) => [n, `rgb(var(--gold-${n}) / <alpha-value>)`])),
       },
     },
   },
