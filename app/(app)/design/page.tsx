@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useCan } from '@/components/RoleContext';
+import { PageHeader, SectionIcon } from '@/components/ui';
 import { useSettings } from '@/components/SettingsContext';
 import { supabaseBrowser } from '@/lib/supabase/client';
 import { NAV_LINKS } from '@/lib/nav';
@@ -82,16 +83,12 @@ export default function DesignPage() {
 
   return (
     <div className="space-y-6">
-      <header className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold">Design</h1>
-          <p className="text-sm text-slate-500">How the Command Center looks for everyone. Admins only. You can also ask Ask Claude, for example “make the header plum” or “move Mentoring above Spotlight”.</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
+      <PageHeader href="/design" title="Design" actions={<>
           <button className="btn-ghost" disabled={!dirty || saving} onClick={() => { setDraft(settings); setStatus(null); }}>Undo edits</button>
           <button className="btn-primary" disabled={!dirty || saving} onClick={() => save(draft, 'Saved. Everyone sees the new design now.')}>{saving ? 'Saving…' : 'Save changes'}</button>
-        </div>
-      </header>
+        </>}>
+        How the Command Center looks for everyone. Admins only. You can also ask Ask Claude, for example “make the header plum” or “move Mentoring above Spotlight”.
+      </PageHeader>
 
       {status && (
         <p className={`rounded-lg px-3 py-2 text-sm ${status.tone === 'ok' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-700'}`}>{status.text}</p>
@@ -167,7 +164,7 @@ export default function DesignPage() {
               const who = (link as any).adminOnly ? 'Admins' : (link as any).editorsOnly ? 'Members' : null;
               return (
                 <li key={href} className={`flex items-center gap-2 py-2 ${hidden ? 'opacity-50' : ''}`}>
-                  <span className="w-6 text-center text-lg">{link.icon}</span>
+                  <SectionIcon href={href} />
                   <input
                     className="input min-w-0 flex-1"
                     value={draft.navLabels[href] ?? ''}

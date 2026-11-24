@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { PageHeader } from '@/components/ui';
 import JSZip from 'jszip';
 import { useCan } from '@/components/RoleContext';
 import { supabaseBrowser } from '@/lib/supabase/client';
@@ -111,13 +112,10 @@ export default function BackupPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold">Backup</h1>
-        <p className="text-sm text-slate-500">
-          Download a complete copy of the program's records for AITCF: every table as a spreadsheet, plus every uploaded document.
+      <PageHeader href="/backup" title="Backup">
+        Download a complete copy of the program's records for AITCF: every table as a spreadsheet, plus every uploaded document.
           Run one regularly, for example after each monthly meeting.
-        </p>
-      </header>
+      </PageHeader>
       <section className="card space-y-4">
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" className="h-4 w-4 accent-brand-600" checked={withFiles} onChange={(e) => setWithFiles(e.target.checked)} />

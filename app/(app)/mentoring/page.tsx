@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { statusTone } from '@/lib/colors';
+import { PageHeader } from '@/components/ui';
 import EditableTable, { type Column } from '@/components/EditableTable';
 import ErrorBar from '@/components/ErrorBar';
 import FilesCell from '@/components/FilesCell';
@@ -27,19 +29,18 @@ export default function MentoringPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold">Mentoring</h1>
-        <p className="text-sm text-slate-500">Every mentee goes through intake and Dale&apos;s pre-screen call before a match. Log every session; two adults are present at each one.</p>
-      </header>
+      <PageHeader href="/mentoring" title="Mentoring">
+        Every mentee goes through intake and Dale&apos;s pre-screen call before a match. Log every session; two adults are present at each one.
+      </PageHeader>
 
       {canEdit && (
         <section className="card">
           <h2 className="mb-3 font-semibold">Mentee pipeline</h2>
           <ol className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-8">
             {MENTEE_STAGE.map((s, i) => (
-              <li key={s.value} className={`rounded-lg p-2 text-center ${s.value === 'matched' ? 'bg-brand-700 text-white' : 'bg-slate-50'}`}>
-                <p className="text-xl font-semibold">{mentees.rows.filter((m) => m.stage === s.value).length}</p>
-                <p className={`text-[11px] leading-tight ${s.value === 'matched' ? 'text-brand-100' : 'text-slate-500'}`}>{i + 1}. {s.label}</p>
+              <li key={s.value} className={`rounded-xl p-2 text-center ${statusTone(s.value)?.tile ?? 'bg-slate-50'} ${s.value === 'matched' ? 'ring-2 ring-green-600' : ''}`}>
+                <p className="text-xl font-extrabold">{mentees.rows.filter((m) => m.stage === s.value).length}</p>
+                <p className="text-[11px] font-semibold leading-tight">{i + 1}. {s.label}</p>
               </li>
             ))}
           </ol>

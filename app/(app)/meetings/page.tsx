@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { PageHeader } from '@/components/ui';
 import EditableTable, { type Column } from '@/components/EditableTable';
 import ErrorBar from '@/components/ErrorBar';
 import FilesCell from '@/components/FilesCell';
@@ -24,10 +25,9 @@ export default function MeetingsPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold">Meetings & decisions</h1>
-        <p className="text-sm text-slate-500">The committee meets monthly. Attach the agenda and recap to each meeting, log what was decided, and keep the open questions in front of everyone.</p>
-      </header>
+      <PageHeader href="/meetings" title="Meetings & decisions">
+        The committee meets monthly. Attach the agenda and recap to each meeting, log what was decided, and keep the open questions in front of everyone.
+      </PageHeader>
       <Tabs<Tab> value={tab} onChange={setTab} tabs={[
         { key: 'meetings', label: 'Meetings', count: meetings.rows.length },
         { key: 'decisions', label: 'Decisions', count: decisions.rows.filter((d) => d.status === 'active').length },

@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useState } from 'react';
+import { PageHeader } from '@/components/ui';
 import EditableTable, { type Column } from '@/components/EditableTable';
 import ErrorBar from '@/components/ErrorBar';
 import { useCan } from '@/components/RoleContext';
@@ -29,14 +30,11 @@ export default function TeamPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold">Team</h1>
-        <p className="text-sm text-slate-500">
-          {isAdmin
+      <PageHeader href="/team" title="Team">
+        {isAdmin
             ? 'People request access from the sign-in page. Approve them here; set their access to "No access" to remove them.'
             : 'People with access to this dashboard. Admins manage access.'}
-        </p>
-      </header>
+      </PageHeader>
 
       <ErrorBar error={people.error} onClose={() => people.setError(null)} />
 

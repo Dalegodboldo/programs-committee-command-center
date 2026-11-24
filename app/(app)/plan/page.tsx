@@ -1,6 +1,7 @@
 'use client';
 
 import EditableTable, { type Column } from '@/components/EditableTable';
+import { PageHeader } from '@/components/ui';
 import ErrorBar from '@/components/ErrorBar';
 import { Progress } from '@/components/Tabs';
 import { useCan } from '@/components/RoleContext';
@@ -57,10 +58,9 @@ export default function PlanPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold">Plan & goals</h1>
-        <p className="text-sm text-slate-500">What we&apos;re aiming for, how we know we got there, and the rules every member follows. Update the &quot;So far&quot; numbers as things happen.</p>
-      </header>
+      <PageHeader href="/plan" title="Plan & goals">
+        What we&apos;re aiming for, how we know we got there, and the rules every member follows. Update the &quot;So far&quot; numbers as things happen.
+      </PageHeader>
       <ErrorBar error={goals.error} onClose={() => goals.setError(null)} />
 
       <section className="card">

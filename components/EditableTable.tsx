@@ -2,6 +2,8 @@
 
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { Row } from '@/lib/types';
+import { cellTone } from '@/lib/colors';
+import { Avatar, Chip } from './ui';
 
 export type Column = {
   key: string;
@@ -131,7 +133,12 @@ function Cell({ row, col, editable, onSave }: { row: Row; col: Column; editable:
 
   if (!editable) {
     if (col.type === 'checkbox') return <span>{value ? '✓' : ''}</span>;
-    if (col.type === 'select') return <span>{col.options?.find((o) => o.value === value)?.label ?? value}</span>;
+    if (col.type === 'select') {
+      const label = col.options?.find((o) => o.value === value)?.label ?? value;
+      const tone = cellTone(col.key, value);
+      if (col.key === 'owner' && value) return <span className="inline-flex items-center gap-2"><Avatar name={value} />{label}</span>;
+      return tone ? <Chip cls={tone.chip}>{label}</Chip> : <span>{label}</span>;
+    }
     if (col.type === 'money') return <span>{value == null ? '' : Number(value).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</span>;
     return <span className="whitespace-pre-wrap">{toText(value)}</span>;
   }
@@ -141,8 +148,10 @@ function Cell({ row, col, editable, onSave }: { row: Row; col: Column; editable:
   }
 
   if (col.type === 'select') {
-    return (
-      <select className="input" value={value ?? ''} onChange={(e) => onSave(e.target.value === '' ? null : e.target.value)}>
+    // Statuses and workstreams show as colored pills; owners get their initials.
+    const tone = cellTone(col.key, value);
+    const select = (
+      <select className={tone ? `pill-select ${tone.chip}` : 'input'} value={value ?? ''} onChange={(e) => onSave(e.target.value === '' ? null : e.target.value)} aria-label={col.label}>
         {col.options?.map((o) => (
           <option key={o.value} value={o.value}>
             {o.label}
@@ -150,6 +159,8 @@ function Cell({ row, col, editable, onSave }: { row: Row; col: Column; editable:
         ))}
       </select>
     );
+    if (col.key === 'owner' && value) return <span className="flex items-center gap-2"><Avatar name={value} />{select}</span>;
+    return select;
   }
 
   const commit = () => {

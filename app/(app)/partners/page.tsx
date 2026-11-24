@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { statusTone } from '@/lib/colors';
+import { PageHeader } from '@/components/ui';
 import EditableTable, { type Column } from '@/components/EditableTable';
 import ErrorBar from '@/components/ErrorBar';
 import FilesCell from '@/components/FilesCell';
@@ -26,10 +28,9 @@ export default function PartnersPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold">Partners & funding</h1>
-        <p className="text-sm text-slate-500">Schools, community groups, venues and funders that feed and host the program, plus grants and the Florida provider listing.</p>
-      </header>
+      <PageHeader href="/partners" title="Partners & funding">
+        Schools, community groups, venues and funders that feed and host the program, plus grants and the Florida provider listing.
+      </PageHeader>
       <Tabs<Tab> value={tab} onChange={setTab} tabs={[
         { key: 'partners', label: 'Partners', count: partners.rows.length },
         { key: 'grants', label: 'Grants', count: grants.rows.length },
@@ -68,9 +69,9 @@ function Partners({ t }: { t: ReturnType<typeof useLiveTable> }) {
       <section className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-8">
         {PARTNER_STATUS.map((s) => (
           <button key={s.value} onClick={() => setStatus(status === s.value ? 'all' : s.value)}
-            className={`card p-2 text-center ${status === s.value ? 'ring-2 ring-brand-600' : ''}`}>
-            <p className="text-xl font-semibold">{t.rows.filter((p) => p.status === s.value).length}</p>
-            <p className="text-[11px] text-slate-500">{s.label}</p>
+            className={`rounded-2xl p-2.5 text-center ${statusTone(s.value)?.tile ?? 'bg-white'} ${status === s.value ? 'ring-2 ring-current' : ''}`}>
+            <p className="text-xl font-extrabold">{t.rows.filter((p) => p.status === s.value).length}</p>
+            <p className="text-[11px] font-semibold">{s.label}</p>
           </button>
         ))}
       </section>

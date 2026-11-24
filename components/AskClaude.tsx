@@ -31,6 +31,12 @@ const nice = (f: string) => f.replace(/_/g, ' ');
 export default function AskClaude() {
   const { canEdit } = useCan();
   const [open, setOpen] = useState(false);
+  // Other parts of the app (the Overview's Ask Claude button) can open the chat.
+  useEffect(() => {
+    const show = () => setOpen(true);
+    window.addEventListener('open-ask-claude', show);
+    return () => window.removeEventListener('open-ask-claude', show);
+  }, []);
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState('');
   const [busy, setBusy] = useState(false);

@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useRef, useState } from 'react';
+import { PageHeader } from '@/components/ui';
 import ErrorBar from '@/components/ErrorBar';
 import { ExternalButton } from '@/components/Tabs';
 import DocPreview from '@/components/DocPreview';
@@ -179,10 +180,9 @@ export default function DocumentsPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold">Documents</h1>
-        <p className="text-sm text-slate-500">Private storage, organized by folder. Make subfolders inside any folder, or upload a whole folder from your computer and its structure comes with it. Each top folder&apos;s access is enforced by the database.</p>
-      </header>
+      <PageHeader href="/documents" title="Documents">
+        Private storage, organized by folder. Make subfolders inside any folder, or upload a whole folder from your computer and its structure comes with it. Each top folder&apos;s access is enforced by the database.
+      </PageHeader>
       <ErrorBar error={docs.error ?? subs.error} onClose={() => { docs.setError(null); subs.setError(null); }} />
 
       {preview && <DocPreview doc={preview} onClose={() => setPreview(null)} />}

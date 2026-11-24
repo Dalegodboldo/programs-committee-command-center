@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { statusTone } from '@/lib/colors';
+import { PageHeader } from '@/components/ui';
 import EditableTable, { type Column } from '@/components/EditableTable';
 import ErrorBar from '@/components/ErrorBar';
 import FilesCell from '@/components/FilesCell';
@@ -28,10 +30,9 @@ export default function SpotlightPage() {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold">Spotlight</h1>
-        <p className="text-sm text-slate-500">Discover, spotlight, mentor, showcase. Full names stay here; public posts use first names only, and only after the guardian signs the release.</p>
-      </header>
+      <PageHeader href="/spotlight" title="Spotlight">
+        Discover, spotlight, mentor, showcase. Full names stay here; public posts use first names only, and only after the guardian signs the release.
+      </PageHeader>
 
       <section className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
         <Mini label="On the roster" value={artists.rows.length} />
@@ -46,9 +47,9 @@ export default function SpotlightPage() {
         <h2 className="mb-3 font-semibold">Outreach pipeline</h2>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-8">
           {counts.map((c) => (
-            <div key={c.value} className="rounded-lg bg-slate-50 p-2 text-center">
-              <p className="text-xl font-semibold">{c.n}</p>
-              <p className="text-[11px] leading-tight text-slate-500">{c.label}</p>
+            <div key={c.value} className={`rounded-xl p-2 text-center ${statusTone(c.value)?.tile ?? 'bg-slate-50'}`}>
+              <p className="text-xl font-extrabold">{c.n}</p>
+              <p className="text-[11px] font-semibold leading-tight">{c.label}</p>
             </div>
           ))}
         </div>
