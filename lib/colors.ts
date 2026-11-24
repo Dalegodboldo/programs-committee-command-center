@@ -16,6 +16,7 @@ const T = {
   orange: { chip: 'bg-orange-100 text-orange-800', dot: 'bg-orange-500', tile: 'bg-orange-50 text-orange-800', bar: 'bg-orange-600' },
   amber: { chip: 'bg-amber-100 text-amber-800', dot: 'bg-amber-500', tile: 'bg-amber-50 text-amber-800', bar: 'bg-amber-500' },
   yellow: { chip: 'bg-yellow-100 text-yellow-800', dot: 'bg-yellow-500', tile: 'bg-yellow-50 text-yellow-800', bar: 'bg-yellow-500' },
+  lime: { chip: 'bg-lime-100 text-lime-800', dot: 'bg-lime-500', tile: 'bg-lime-50 text-lime-800', bar: 'bg-lime-600' },
   red: { chip: 'bg-red-100 text-red-800', dot: 'bg-red-500', tile: 'bg-red-50 text-red-800', bar: 'bg-red-600' },
 } satisfies Record<string, Tone>;
 export const TONES = T;
@@ -23,7 +24,7 @@ export const TONES = T;
 // Workstreams (action items)
 export const WORKSTREAM_TONE: Record<string, Tone> = {
   Spotlight: T.pink, Mentoring: T.green, Safeguarding: T.indigo, 'Florida provider': T.orange, Partnerships: T.blue,
-  Grants: T.teal, Ambassadors: T.violet, Showcases: T.yellow, Nashville: T.sky, Committee: T.slate, Other: T.stone,
+  Grants: T.teal, Ambassadors: T.violet, Showcases: T.yellow, Nashville: T.sky, 'Playground Scholarship': T.lime, Committee: T.slate, Other: T.stone,
 };
 export const workstreamTone = (w?: string | null) => WORKSTREAM_TONE[w ?? ''] ?? T.stone;
 

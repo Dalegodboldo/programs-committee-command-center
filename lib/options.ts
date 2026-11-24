@@ -9,7 +9,7 @@ export const ACTION_STATUS = opts([['not_started', 'Not started'], ['in_progress
 export const WORKSTREAM = opts([
   ['Spotlight', 'Spotlight'], ['Mentoring', 'Mentoring'], ['Safeguarding', 'Safeguarding'], ['Florida provider', 'Florida provider'],
   ['Partnerships', 'Partnerships'], ['Grants', 'Grants'], ['Ambassadors', 'Ambassadors'], ['Showcases', 'Showcases'],
-  ['Nashville', 'Nashville'], ['Committee', 'Committee'], ['Other', 'Other'],
+  ['Nashville', 'Nashville'], ['Playground Scholarship', 'Playground Scholarship'], ['Committee', 'Committee'], ['Other', 'Other'],
 ]);
 
 export const MEETING_STATUS = opts([['planned', 'Planned'], ['held', 'Held'], ['cancelled', 'Cancelled']]);

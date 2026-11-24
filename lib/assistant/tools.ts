@@ -30,7 +30,7 @@ export const READ_TABLES: Record<string, TableSpec> = {
 };
 
 const PEOPLE = ['Dale Eugene', 'Chasen Hampton', 'Tony Lucca', 'Patty Adams', 'Bret Iwan', 'Jenn Kramer', 'Gloria Ayee', 'All members'];
-const WORKSTREAMS = ['Spotlight', 'Mentoring', 'Safeguarding', 'Florida provider', 'Partnerships', 'Grants', 'Ambassadors', 'Showcases', 'Nashville', 'Committee', 'Other'];
+const WORKSTREAMS = ['Spotlight', 'Mentoring', 'Safeguarding', 'Florida provider', 'Partnerships', 'Grants', 'Ambassadors', 'Showcases', 'Nashville', 'Playground Scholarship', 'Committee', 'Other'];
 const REGIONS = ['California', 'Central Florida', 'Nashville', 'Arizona', 'National', 'Other'];
 
 export const EDITABLE: Record<string, { label: string; title: string; fields: Record<string, 'text' | 'date' | 'bool' | 'number' | string[]> }> = {
