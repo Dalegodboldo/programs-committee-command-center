@@ -25,7 +25,11 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const r = await build(request);
   if ('error' in r) return NextResponse.json({ ok: false, reason: r.error }, { status: r.status });
-  if (!r.me.email) return NextResponse.json({ ok: false, reason: 'Your account has no email address.' });
-  const result = await sendBatch([{ to: r.me.email, subject: `[Test] ${r.digest.subject}`, html: r.digest.html }]);
-  return NextResponse.json({ ok: result.errors.length === 0, reason: result.errors[0], to: r.me.email });
+  // Until a sending domain is verified in Resend, it only delivers to the Resend account's own
+  // address (the access-alert address), so the test goes there.
+  const alertTo = (process.env.ADMIN_NOTIFY_EMAILS ?? '').split(',').map((s) => s.trim()).filter(Boolean)[0];
+  const to = process.env.NOTIFY_FROM ? r.me.email : alertTo || r.me.email;
+  if (!to) return NextResponse.json({ ok: false, reason: 'Your account has no email address.' });
+  const result = await sendBatch([{ to, subject: `[Test] ${r.digest.subject}`, html: r.digest.html }]);
+  return NextResponse.json({ ok: result.errors.length === 0, reason: result.errors[0] ? `${result.errors[0]} Tried to send to ${to}.` : undefined, to });
 }

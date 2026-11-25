@@ -25,17 +25,20 @@ export async function GET(request: Request) {
 
   let recipients = (people.data ?? []).filter((p) => p.email && ['admin', 'member'].includes(p.role) && p.weekly_email !== false);
   // Until a sending domain is verified in Resend, it only delivers to the account owner's address.
+  // Until then, admins' emails go to the access-alert address and everyone else is skipped.
   let skipped: string[] = [];
+  const deliverTo = new Map<string, string>();
   if (!process.env.NOTIFY_FROM) {
-    const allowed = (process.env.ADMIN_NOTIFY_EMAILS ?? '').split(',').map((s) => s.trim().toLowerCase()).filter(Boolean);
-    skipped = recipients.filter((p) => !allowed.includes(String(p.email).toLowerCase())).map((p) => p.email);
-    recipients = recipients.filter((p) => allowed.includes(String(p.email).toLowerCase()));
+    const alertTo = (process.env.ADMIN_NOTIFY_EMAILS ?? '').split(',').map((s) => s.trim()).filter(Boolean)[0];
+    skipped = recipients.filter((p) => p.role !== 'admin' || !alertTo).map((p) => p.email);
+    recipients = recipients.filter((p) => p.role === 'admin' && alertTo);
+    recipients.forEach((p) => deliverTo.set(p.id, alertTo!));
   }
 
   const today = pacificToday();
   const messages = recipients.map((p) => {
     const d = buildDigest({ person: p, actions: actions.data ?? [], meetings: meetings.data ?? [], origin: SITE, today });
-    return { to: p.email as string, subject: d.subject, html: d.html };
+    return { to: deliverTo.get(p.id) ?? (p.email as string), subject: d.subject, html: d.html };
   });
   const result = await sendBatch(messages);
 
