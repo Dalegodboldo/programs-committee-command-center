@@ -54,6 +54,7 @@ export const SECTION: Record<string, SectionStyle> = {
   '/spotlight': { icon: 'mic', tile: 'bg-pink-100 text-pink-700', soft: 'bg-pink-50 text-pink-800' },
   '/mentoring': { icon: 'users', tile: 'bg-green-100 text-green-700', soft: 'bg-green-50 text-green-800' },
   '/partners': { icon: 'briefcase', tile: 'bg-orange-100 text-orange-700', soft: 'bg-orange-50 text-orange-800' },
+  '/scholarship': { icon: 'cap', tile: 'bg-lime-100 text-lime-700', soft: 'bg-lime-50 text-lime-800' },
   '/documents': { icon: 'folder', tile: 'bg-amber-100 text-amber-700', soft: 'bg-amber-50 text-amber-800' },
   '/team': { icon: 'user', tile: 'bg-slate-200 text-slate-700', soft: 'bg-slate-200/70 text-slate-800' },
   '/design': { icon: 'palette', tile: 'bg-slate-100 text-slate-600', soft: 'bg-white text-slate-700 ring-1 ring-slate-200' },

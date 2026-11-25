@@ -42,6 +42,8 @@ export const MENTEE_SOURCE = opts([
 ]);
 export const SESSION_FORMAT = opts([['zoom', 'Zoom'], ['in_person', 'In person'], ['phone', 'Phone']]);
 // Where AITCF runs mentor background checks.
+// DocuSign web app (AITCF's account). Signed copies get saved in Documents by hand for now.
+export const DOCUSIGN_URL = 'https://apps.docusign.com/send/home';
 export const CHECKR_URL = 'https://dashboard.checkr.com/home';
 
 export const BACKGROUND_CHECK = opts([['not_started', 'Not started'], ['requested', 'Requested'], ['on_file', 'On file'], ['expired', 'Expired']]);

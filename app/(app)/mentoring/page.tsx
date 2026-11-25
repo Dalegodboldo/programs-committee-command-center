@@ -9,7 +9,7 @@ import FilesCell from '@/components/FilesCell';
 import Tabs, { ExternalButton, Pill } from '@/components/Tabs';
 import { useCan } from '@/components/RoleContext';
 import { useLiveTable } from '@/lib/useLiveTable';
-import { AGE_STATUS, BACKGROUND_CHECK, CHECKR_URL, DISCIPLINE, MENTEE_SOURCE, MENTEE_STAGE, SESSION_FORMAT } from '@/lib/options';
+import { AGE_STATUS, BACKGROUND_CHECK, CHECKR_URL, DOCUSIGN_URL, DISCIPLINE, MENTEE_SOURCE, MENTEE_STAGE, SESSION_FORMAT } from '@/lib/options';
 import { today } from '@/lib/dates';
 import type { Row } from '@/lib/types';
 
@@ -147,7 +147,12 @@ function Mentors({ t, mentees }: { t: ReturnType<typeof useLiveTable>; mentees: 
     <>
       <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
         <p className="max-w-2xl text-sm text-slate-500">A mentor is ready once their background check is on file and they&apos;ve signed the code of conduct. AITCF runs background checks through Checkr. Save each report in Documents › Background Checks (admins only).</p>
-        {canEdit && <ExternalButton href={CHECKR_URL} title="Opens the Checkr dashboard in a new tab. Sign in with AITCF's Checkr account.">Open Checkr</ExternalButton>}
+        {canEdit && (
+          <div className="flex flex-wrap gap-2">
+            <ExternalButton href={CHECKR_URL} title="Opens the Checkr dashboard in a new tab. Sign in with AITCF's Checkr account.">Open Checkr</ExternalButton>
+            <ExternalButton href={DOCUSIGN_URL} title="Opens DocuSign in a new tab, for the code of conduct and other agreements">Open DocuSign</ExternalButton>
+          </div>
+        )}
       </div>
       <ErrorBar error={t.error} onClose={() => t.setError(null)} />
       <EditableTable rows={t.rows} columns={cols} canEdit={canEdit} onUpdate={t.update} onDelete={t.remove}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { PageHeader } from '@/components/ui';
 import ErrorBar from '@/components/ErrorBar';
 import { ExternalButton } from '@/components/Tabs';
@@ -8,7 +8,8 @@ import DocPreview from '@/components/DocPreview';
 import { useCan, useProfile } from '@/components/RoleContext';
 import { useLiveTable } from '@/lib/useLiveTable';
 import { supabaseBrowser } from '@/lib/supabase/client';
-import { ACCESS_LABEL, CHECKR_URL, DOC_FOLDERS, DOC_LINKS, folderLabel } from '@/lib/options';
+import { queryParam } from '@/lib/goals';
+import { ACCESS_LABEL, CHECKR_URL, DOCUSIGN_URL, DOC_FOLDERS, DOC_LINKS, folderLabel } from '@/lib/options';
 import { fileSize, filesFromDrop, isInside, isJunk, joinPath, uploadItems } from '@/lib/docs';
 import type { Row } from '@/lib/types';
 
@@ -89,6 +90,12 @@ export default function DocumentsPage() {
     ...pathsIn(f.value).map((p) => ({ folder: f.value, path: p, label: `${f.label} / ${p.split('/').join(' / ')}` })),
   ]);
   const canDropInto = (f: string) => moveFolders.some((t) => t.value === f);
+
+  // Links like /documents?folder=playground open that folder.
+  useEffect(() => {
+    const f = queryParam('folder');
+    if (f && DOC_FOLDERS.some((d) => d.value === f)) setFolder(f);
+  }, []);
 
   function open(f: string, p = '') {
     setFolder(f);
@@ -245,6 +252,7 @@ export default function DocumentsPage() {
             {canUploadHere && (
               <div className="flex flex-wrap gap-2">
                 {folder === 'screening' && <ExternalButton href={CHECKR_URL} title="Opens the Checkr dashboard in a new tab">Open Checkr</ExternalButton>}
+                {['releases', 'playground', 'mentoring', 'partners'].includes(folder) && <ExternalButton href={DOCUSIGN_URL} title="Opens DocuSign in a new tab. Download signed copies and upload them here.">Open DocuSign</ExternalButton>}
                 {folder !== 'all' && <button className="btn-ghost" onClick={() => setNaming(!naming)} disabled={busy}>+ New folder</button>}
                 <label className={`btn-ghost cursor-pointer ${busy ? 'pointer-events-none opacity-50' : ''}`}>
                   Upload a folder

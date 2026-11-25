@@ -7,6 +7,7 @@ export const NAV_LINKS = [
   { href: '/spotlight', label: 'Spotlight', icon: '🎤', hint: 'Roster and content calendar', editorsOnly: true },
   { href: '/mentoring', label: 'Mentoring', icon: '🤝', hint: 'Mentees, sessions, mentors' },
   { href: '/partners', label: 'Partners & funding', icon: '🏛️', hint: 'Partners, grants, Florida classes' },
+  { href: '/scholarship', label: 'Playground Scholarship', icon: '🎓', hint: 'Scholarship work, partner, files' },
   { href: '/documents', label: 'Documents', icon: '🗂️', hint: 'Files by folder' },
   { href: '/team', label: 'Team', icon: '👥', hint: 'Access and roles' },
   { href: '/design', label: 'Design', icon: '🎨', hint: 'Colors, names, menu', adminOnly: true },

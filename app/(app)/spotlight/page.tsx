@@ -6,10 +6,10 @@ import { PageHeader } from '@/components/ui';
 import EditableTable, { type Column } from '@/components/EditableTable';
 import ErrorBar from '@/components/ErrorBar';
 import FilesCell from '@/components/FilesCell';
-import Tabs, { Pill } from '@/components/Tabs';
+import Tabs, { ExternalButton, Pill } from '@/components/Tabs';
 import { useCan } from '@/components/RoleContext';
 import { useLiveTable } from '@/lib/useLiveTable';
-import { AGE_STATUS, DISCIPLINE, OUTREACH_STATUS, POST_FORMAT, POST_STATUS } from '@/lib/options';
+import { AGE_STATUS, DISCIPLINE, DOCUSIGN_URL, OUTREACH_STATUS, POST_FORMAT, POST_STATUS } from '@/lib/options';
 import { addDays, shortDate, today } from '@/lib/dates';
 import type { Row } from '@/lib/types';
 
@@ -30,7 +30,8 @@ export default function SpotlightPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader href="/spotlight" title="Spotlight">
+      <PageHeader href="/spotlight" title="Spotlight"
+        actions={<ExternalButton href={DOCUSIGN_URL} title="Opens DocuSign in a new tab to send media releases. Save signed copies in Documents › Releases & Consent.">Open DocuSign</ExternalButton>}>
         Discover, spotlight, mentor, showcase. Full names stay here; public posts use first names only, and only after the guardian signs the release.
       </PageHeader>
 
