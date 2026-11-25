@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import PartnerCard from '@/components/PartnerCard';
+import Icon from '@/components/Icon';
 import { statusTone } from '@/lib/colors';
 import { PageHeader } from '@/components/ui';
 import EditableTable, { type Column } from '@/components/EditableTable';
@@ -12,6 +14,7 @@ import { useLiveTable } from '@/lib/useLiveTable';
 import { CLASS_DELIVERY, CLASS_STATUS, GRANT_STATUS, OWNER, PARTNER_KIND, PARTNER_STATUS, REGION } from '@/lib/options';
 import { relative, today } from '@/lib/dates';
 import { queryParam } from '@/lib/goals';
+import type { Row } from '@/lib/types';
 
 type Tab = 'partners' | 'grants' | 'florida';
 const money = (n: number) => n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
@@ -49,9 +52,16 @@ function Partners({ t }: { t: ReturnType<typeof useLiveTable> }) {
   const [region, setRegion] = useState('all');
   const [status, setStatus] = useState('all');
   const now = today();
+  const [cardId, setCardId] = useState<string | null>(null);
+  const card = t.rows.find((p) => p.id === cardId);
   const rows = t.rows.filter((p) => (region === 'all' || p.region === region) && (status === 'all' || p.status === status));
   const cols: Column[] = [
     { key: 'name', label: 'Partner', width: '200px' },
+    { key: '_card', label: '', type: 'computed', render: (r) => (
+      <button className="btn-ghost whitespace-nowrap !px-2.5 text-xs" onClick={() => setCardId(r.id)} title="All contact details">
+        <Icon name="user" className="h-3.5 w-3.5" />Contacts{filled(r) ? ` · ${filled(r)}` : ''}
+      </button>
+    ) },
     { key: 'status', label: 'Status', type: 'select', options: PARTNER_STATUS, width: '130px' },
     { key: 'kind', label: 'Type', type: 'select', options: [{ value: '', label: '—' }, ...PARTNER_KIND], width: '170px' },
     { key: 'region', label: 'Region', type: 'select', options: [{ value: '', label: '—' }, ...REGION], width: '140px' },
@@ -61,6 +71,7 @@ function Partners({ t }: { t: ReturnType<typeof useLiveTable> }) {
     { key: '_late', label: '', type: 'computed', render: (r) => r.next_step_date && r.next_step_date < now && !['declined', 'paused', 'active'].includes(r.status) ? <Pill tone="red">{relative(r.next_step_date)}</Pill> : null },
     { key: 'contact_name', label: 'Contact', width: '150px' },
     { key: 'contact_email', label: 'Contact email', width: '180px' },
+    { key: 'contact_phone', label: 'Contact phone', width: '150px' },
     { key: 'notes', label: 'Notes', type: 'textarea', width: '220px' },
     { key: '_files', label: 'Files', type: 'computed', render: (r) => <FilesCell docs={docs} field="partner_id" id={r.id} folder="partners" /> },
   ];
@@ -88,6 +99,7 @@ function Partners({ t }: { t: ReturnType<typeof useLiveTable> }) {
         <EditableTable rows={rows} columns={cols} canEdit={canEdit} onUpdate={t.update} onDelete={t.remove}
           onAdd={() => t.insert({ name: 'New partner', region: region === 'all' ? null : region })} addLabel="Add partner" />
       </section>
+      {card && <PartnerCard row={card} canEdit={canEdit} onUpdate={(patch) => t.update(card.id, patch)} onClose={() => setCardId(null)} />}
     </>
   );
 }
@@ -157,4 +169,10 @@ function Classes({ t }: { t: ReturnType<typeof useLiveTable> }) {
         onAdd={() => t.insert({ title: 'New class idea' })} addLabel="Add class idea" empty="No class ideas yet. Each mentor can add one here and send the synopsis to Jenn." />
     </section>
   );
+}
+
+// How many of the extra contact details are filled in, shown on the Contacts button.
+const CONTACT_KEYS = ['contact_title', 'contact_mobile', 'contact2_name', 'contact2_email', 'contact2_phone', 'website', 'main_phone', 'main_email', 'address', 'city', 'social', 'introduced_by'];
+function filled(r: Row) {
+  return CONTACT_KEYS.filter((k) => r[k] != null && String(r[k]).trim() !== '').length;
 }

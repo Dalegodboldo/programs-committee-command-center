@@ -119,6 +119,10 @@ export default function EditableTable({
   );
 }
 
+export function EditableField(props: { row: Row; col: Column; editable: boolean; onSave: (v: any) => void }) {
+  return <Cell {...props} />;
+}
+
 function Cell({ row, col, editable, onSave }: { row: Row; col: Column; editable: boolean; onSave: (v: any) => void }) {
   const value = row[col.key];
   const [draft, setDraft] = useState<string>(toText(value));

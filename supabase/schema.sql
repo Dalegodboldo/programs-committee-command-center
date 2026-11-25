@@ -253,6 +253,27 @@ create table if not exists public.partners (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+-- More contact details (migration 007)
+alter table public.partners
+  add column if not exists website text,
+  add column if not exists main_phone text,
+  add column if not exists main_email text,
+  add column if not exists address text,
+  add column if not exists city text,
+  add column if not exists state text,
+  add column if not exists postal_code text,
+  add column if not exists social text,
+  add column if not exists contact_title text,
+  add column if not exists contact_phone text,
+  add column if not exists contact_mobile text,
+  add column if not exists contact_preferred text,
+  add column if not exists contact_best_time text,
+  add column if not exists contact2_name text,
+  add column if not exists contact2_title text,
+  add column if not exists contact2_email text,
+  add column if not exists contact2_phone text,
+  add column if not exists introduced_by text,
+  add column if not exists last_contacted date;
 
 -- Grants
 create table if not exists public.grants (
