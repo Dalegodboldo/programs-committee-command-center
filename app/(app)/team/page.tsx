@@ -1,10 +1,11 @@
 'use client';
 
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { PageHeader } from '@/components/ui';
 import EditableTable, { type Column } from '@/components/EditableTable';
 import ErrorBar from '@/components/ErrorBar';
-import { useCan } from '@/components/RoleContext';
+import { useCan, useProfile } from '@/components/RoleContext';
+import { supabaseBrowser } from '@/lib/supabase/client';
 import { useLiveTable } from '@/lib/useLiveTable';
 import type { Row } from '@/lib/types';
 
@@ -26,6 +27,7 @@ export default function TeamPage() {
     { key: 'full_name', label: 'Name', width: '180px' },
     { key: 'email', label: 'Email', width: '220px', editable: false },
     { key: 'role', label: 'Access', type: 'select', options: ROLES, width: '180px' },
+    { key: 'weekly_email', label: 'Weekly email', type: 'checkbox', width: '110px' },
   ];
 
   return (
@@ -78,6 +80,8 @@ export default function TeamPage() {
         </section>
       )}
 
+      <WeeklyEmail people={people.rows} isAdmin={isAdmin} onChanged={people.reload} />
+
       {isAdmin && <EmailCheck />}
 
       <RoleMatrix />
@@ -103,6 +107,95 @@ function Request({ person, onUpdate }: { person: Row; onUpdate: (id: string, pat
         <button className="btn-ghost" onClick={() => onUpdate(person.id, { declined: true })}>Decline</button>
       </div>
     </li>
+  );
+}
+
+// The Monday email: each person's switch, plus setup status, preview and test for admins.
+function WeeklyEmail({ people, isAdmin, onChanged }: { people: Row[]; isAdmin: boolean; onChanged: () => void }) {
+  const profile = useProfile();
+  const me = people.find((p) => p.id === profile.id);
+  const [saving, setSaving] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [status, setStatus] = useState<Record<string, boolean> | null>(null);
+  const [preview, setPreview] = useState(false);
+  const [test, setTest] = useState<{ ok: boolean; reason?: string; to?: string } | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (isAdmin) fetch('/api/digest/status').then((r) => (r.ok ? r.json() : null)).then(setStatus).catch(() => {});
+  }, [isAdmin]);
+
+  const on = me ? me.weekly_email !== false : true;
+  const supported = !me || 'weekly_email' in me;
+  async function toggle() {
+    setSaving(true);
+    setErr(null);
+    const { error } = await supabaseBrowser().rpc('set_my_weekly_email', { on_off: !on });
+    if (!error) onChanged();
+    if (error) setErr(error.message.includes('set_my_weekly_email') ? 'The weekly email switch isn’t set up yet. An admin needs to run 008_weekly_email.sql in Supabase.' : error.message);
+    setSaving(false);
+  }
+  async function sendTest() {
+    setBusy(true);
+    setTest(null);
+    const res = await fetch('/api/digest/test', { method: 'POST' });
+    setTest(await res.json().catch(() => ({ ok: false, reason: `Unexpected response (${res.status}).` })));
+    setBusy(false);
+  }
+  const receiving = people.filter((p) => (p.role === 'admin' || p.role === 'member') && p.weekly_email !== false && p.email);
+  const noName = receiving.filter((p) => !p.full_name || p.full_name === p.email);
+  const steps: [string, boolean | undefined, string][] = [
+    ['Resend key', status?.resend, 'RESEND_API_KEY in Vercel'],
+    ['Supabase secret key', status?.secretKey, 'SUPABASE_SECRET_KEY in Vercel'],
+    ['Schedule secret', status?.cronSecret, 'CRON_SECRET in Vercel'],
+    ['Sending domain verified', status?.domain, 'NOTIFY_FROM in Vercel, after verifying the domain in Resend. Until then only you get it.'],
+  ];
+
+  return (
+    <section className="card text-sm">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="mb-1 font-semibold">Weekly email</h2>
+          <p className="text-slate-500">Every Monday morning, admins and committee members get their own list: late items, what’s due this week and the next meeting.</p>
+        </div>
+        {me && (me.role === 'admin' || me.role === 'member') && (
+          <label className="inline-flex cursor-pointer items-center gap-2 rounded-full bg-slate-100 py-1.5 pl-1.5 pr-3 font-semibold">
+            <button role="switch" aria-checked={on} disabled={saving || !supported} onClick={toggle}
+              className={`relative h-6 w-11 rounded-full transition ${on ? 'bg-green-600' : 'bg-slate-300'}`}>
+              <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${on ? 'left-[22px]' : 'left-0.5'}`} />
+            </button>
+            {on ? 'I get it' : 'Off for me'}
+          </label>
+        )}
+      </div>
+      {err && <p className="mt-2 text-red-700">{err}</p>}
+      {!supported && <p className="mt-2 text-amber-800">Needs a one-time setup: an admin runs 008_weekly_email.sql in Supabase.</p>}
+
+      {isAdmin && (
+        <div className="mt-4 space-y-3 border-t border-slate-100 pt-4">
+          <p className="text-slate-600">{receiving.length} {receiving.length === 1 ? 'person' : 'people'} will get it. Switch anyone off with the Weekly email box in the Members list.</p>
+          {noName.length > 0 && (
+            <p className="text-amber-800">No full name set for {noName.map((p) => p.email).join(', ')}, so their items can’t be matched. Add their names in the Members list.</p>
+          )}
+          {status && (
+            <ul className="grid gap-1.5 sm:grid-cols-2">
+              {steps.map(([label, ok, hint]) => (
+                <li key={label} className="flex items-start gap-2">
+                  <span className={`mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white ${ok ? 'bg-green-600' : 'bg-amber-500'}`}>{ok ? '✓' : '!'}</span>
+                  <span><span className="font-medium">{label}</span>{!ok && <span className="block text-xs text-slate-500">{hint}</span>}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="flex flex-wrap gap-2">
+            <button className="btn-ghost" onClick={() => setPreview((v) => !v)}>{preview ? 'Hide preview' : 'Preview my email'}</button>
+            <button className="btn-ghost" onClick={sendTest} disabled={busy}>{busy ? 'Sending…' : 'Send me a test'}</button>
+          </div>
+          {test && <p className={test.ok ? 'text-green-700' : 'text-red-700'}>{test.ok ? `Sent to ${test.to}. Check that inbox (and spam).` : test.reason}</p>}
+          {preview && <iframe src="/api/digest/test" title="Weekly email preview" className="h-[640px] w-full rounded-xl border border-slate-200 bg-white" />}
+        </div>
+      )}
+    </section>
   );
 }
 

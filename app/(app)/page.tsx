@@ -356,5 +356,5 @@ const noun = (t: string) =>
     meetings: 'a meeting', action_items: 'an action item', decisions: 'a decision', open_questions: 'an open question', goals: 'a goal',
     spotlight_artists: 'a Spotlight artist', content_posts: 'a Spotlight post', mentors: 'a mentor', mentees: 'a mentee',
     mentoring_sessions: 'a mentoring session', partners: 'a partner', grants: 'a grant', provider_classes: 'a Florida class', documents: 'a document',
-    doc_subfolders: 'a folder', app_settings: 'the app design',
+    doc_subfolders: 'a folder', app_settings: 'the app design', weekly_email: 'the weekly email',
   } as Record<string, string>)[t] ?? t;
