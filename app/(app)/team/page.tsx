@@ -43,12 +43,13 @@ export default function TeamPage() {
       {isAdmin && (
         <section className={`card ${pending.length ? 'border-amber-300' : ''}`}>
           <h2 className="mb-1 font-semibold">Access requests {pending.length > 0 && <span className="text-amber-700">({pending.length})</span>}</h2>
-          <p className="mb-3 text-sm text-slate-500">Confirm with the person directly before approving: anyone can type any email into the request form.</p>
+          <p className="mb-3 text-sm text-slate-500">Confirm with the person directly before approving: anyone can type any email into the request form. Approving emails them that they can sign in.</p>
+          <ApprovalNotice />
           {pending.length === 0 ? (
             <p className="text-sm text-slate-400">No pending requests.</p>
           ) : (
             <ul className="divide-y divide-slate-100">
-              {pending.map((p) => <Request key={p.id} person={p} onUpdate={people.update} />)}
+              {pending.map((p) => <Request key={p.id} person={p} onUpdate={people.update} onApproved={people.reload} />)}
             </ul>
           )}
         </section>
@@ -89,8 +90,21 @@ export default function TeamPage() {
   );
 }
 
-function Request({ person, onUpdate }: { person: Row; onUpdate: (id: string, patch: Record<string, any>) => void }) {
+function Request({ person, onUpdate, onApproved }: { person: Row; onUpdate: (id: string, patch: Record<string, any>) => void; onApproved: () => void }) {
   const [role, setRole] = useState('member');
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  // Approving sets their access and emails them that they can sign in.
+  async function approve() {
+    setBusy(true);
+    setErr(null);
+    const res = await fetch('/api/approve-access', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: person.id, role }) });
+    const r = await res.json().catch(() => ({ ok: false, reason: `Unexpected response (${res.status}).` }));
+    setBusy(false);
+    if (!r.ok) return setErr(r.reason ?? 'Could not approve.');
+    onApproved();
+    window.dispatchEvent(new CustomEvent('access-approved', { detail: { name: person.full_name ?? person.email, ...r } }));
+  }
   return (
     <li className="flex flex-wrap items-start justify-between gap-3 py-3 text-sm">
       <div className="min-w-0">
@@ -98,15 +112,38 @@ function Request({ person, onUpdate }: { person: Row; onUpdate: (id: string, pat
         {person.request_note && <p className="mt-0.5 text-slate-600">“{person.request_note}”</p>}
         <p className="mt-0.5 text-xs text-slate-400">Requested {new Date(person.requested_at ?? person.created_at).toLocaleString()}
           {person.requested_at && person.requested_at !== person.created_at ? ' · asked again' : ''}</p>
+        {err && <p className="mt-1 text-red-700">{err}</p>}
       </div>
       <div className="flex items-center gap-2">
         <select className="input !w-48" value={role} onChange={(e) => setRole(e.target.value)}>
           {ROLES.filter((r) => r.value).map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
         </select>
-        <button className="btn bg-green-600 text-white hover:bg-green-700" onClick={() => onUpdate(person.id, { role, declined: false })}>Approve</button>
-        <button className="btn-ghost" onClick={() => onUpdate(person.id, { declined: true })}>Decline</button>
+        <button className="btn bg-green-600 text-white hover:bg-green-700" disabled={busy} onClick={approve}>{busy ? 'Approving…' : 'Approve'}</button>
+        <button className="btn-ghost" disabled={busy} onClick={() => onUpdate(person.id, { declined: true })}>Decline</button>
       </div>
     </li>
+  );
+}
+
+// After an approval: says whether the person was emailed, or that someone should tell them.
+function ApprovalNotice() {
+  const [n, setN] = useState<{ name: string; emailed: boolean; to?: string; reason?: string } | null>(null);
+  useEffect(() => {
+    const on = (e: Event) => setN((e as CustomEvent).detail);
+    window.addEventListener('access-approved', on);
+    return () => window.removeEventListener('access-approved', on);
+  }, []);
+  if (!n) return null;
+  return (
+    <div className={`mb-3 flex items-start justify-between gap-3 rounded-xl px-3 py-2.5 text-sm ${n.emailed ? 'bg-green-50 text-green-800' : 'bg-amber-50 text-amber-900'}`}>
+      <p>
+        <b>{n.name}</b> is approved.{' '}
+        {n.emailed
+          ? `We emailed ${n.to} to let them know they can sign in.`
+          : `They weren’t emailed${n.reason ? ` (${n.reason})` : ''}. Let them know they can sign in now with the email and password they chose.`}
+      </p>
+      <button className="shrink-0 font-semibold hover:underline" onClick={() => setN(null)} aria-label="Dismiss">✕</button>
+    </div>
   );
 }
 

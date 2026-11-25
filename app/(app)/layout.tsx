@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { canEmailAnyone } from '@/lib/notify';
 import { supabaseServer } from '@/lib/supabase/server';
 import { RoleProvider } from '@/components/RoleContext';
 import Nav from '@/components/Nav';
@@ -37,7 +38,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           ) : (
             <>
               <h1 className="font-semibold">Your access request is with the admins.</h1>
-              <p className="text-sm text-slate-500">You'll be able to see the dashboard once an admin approves it. Signed in as {profile.email}.</p>
+              <p className="text-sm text-slate-500">
+                You&apos;ll be able to see the dashboard once an admin approves it.
+                {canEmailAnyone() ? ' We’ll email you when that happens.' : ''} Signed in as {profile.email}.
+              </p>
             </>
           )}
           <form action="/auth/signout" method="post">

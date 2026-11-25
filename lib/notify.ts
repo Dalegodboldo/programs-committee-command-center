@@ -32,5 +32,27 @@ export async function notifyAdmins(subject: string, html: string): Promise<{ ok:
   }
 }
 
+// Sends one email to one person (not just admins). Before a sending domain is verified in Resend
+// (NOTIFY_FROM unset), Resend only delivers to the Resend account's own address.
+export async function sendEmail(to: string, subject: string, html: string): Promise<{ ok: boolean; reason?: string }> {
+  const { key } = notifyConfig();
+  if (!key) return { ok: false, reason: 'RESEND_API_KEY is not set in Vercel.' };
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: process.env.NOTIFY_FROM || 'AITCF Programs Committee <onboarding@resend.dev>', to: [to], subject, html }),
+    });
+    if (res.ok) return { ok: true };
+    const body = await res.json().catch(() => ({}));
+    return { ok: false, reason: `Resend said: ${body?.message ?? res.statusText} (code ${res.status})` };
+  } catch (e: any) {
+    return { ok: false, reason: `Could not reach Resend: ${e?.message ?? e}` };
+  }
+}
+
+// True once a sending domain is verified and set, so emails can reach anyone.
+export const canEmailAnyone = () => !!(process.env.NOTIFY_FROM ?? '').trim();
+
 export const esc = (s: string | null | undefined) =>
   (s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);

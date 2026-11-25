@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseServer } from '@/lib/supabase/server';
-import { notifyAdmins, esc } from '@/lib/notify';
+import { notifyAdmins, esc, canEmailAnyone } from '@/lib/notify';
 
 // Emails AITCF's admins when someone requests access. Called by /request-access right after sign-up.
 export async function POST(request: Request) {
@@ -36,5 +36,6 @@ export async function POST(request: Request) {
 <p><a href="${origin}/team">Review the request on the Team page</a></p>`,
   );
   if (!result.ok) console.log('[notify-access-request] email not sent:', result.reason);
-  return NextResponse.json({ ok: true, emailed: result.ok });
+  // Tells the request page whether to promise an approval email.
+  return NextResponse.json({ ok: true, emailed: result.ok, approvalEmail: canEmailAnyone() });
 }

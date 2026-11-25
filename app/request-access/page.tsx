@@ -9,6 +9,7 @@ export default function RequestAccessPage() {
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
+  const [willEmail, setWillEmail] = useState(false);
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm({ ...form, [k]: e.target.value });
 
@@ -31,7 +32,8 @@ export default function RequestAccessPage() {
     }
     if (data.session) {
       // Let AITCF's admins know. If email isn't set up yet, the request still appears on the Team page.
-      await fetch('/api/notify-access-request', { method: 'POST' }).catch(() => {});
+      const r = await fetch('/api/notify-access-request', { method: 'POST' }).then((x) => x.json()).catch(() => null);
+      setWillEmail(!!r?.approvalEmail);
       await supabase.auth.signOut();
     }
     setBusy(false);
@@ -43,10 +45,16 @@ export default function RequestAccessPage() {
       <main className="flex min-h-screen items-center justify-center p-4">
         <div className="card w-full max-w-sm space-y-3 text-center">
           <img src="/aitcf-seal.png" alt="" className="mx-auto h-12 w-12" />
-          <h1 className="font-semibold">Request sent</h1>
-          <p className="text-sm text-slate-500">
-            An admin will review your request. Once approved, sign in with the email and password you just chose.
+          <h1 className="text-lg font-semibold">Your request has been sent</h1>
+          <p className="text-sm text-slate-600">
+            A request for access has been made for <b>{form.email.trim()}</b>. An admin will review it.
           </p>
+          <p className="text-sm text-slate-600">
+            {willEmail
+              ? 'When an admin approves it, we’ll send you an email. After that, sign in with the email and password you just chose.'
+              : 'An admin will let you know once it’s approved. After that, sign in with the email and password you just chose.'}
+          </p>
+          <p className="text-xs text-slate-500">If you sign in before then, you’ll just see a note that your request is waiting.</p>
           <Link href="/login" className="btn-ghost justify-center">Back to sign in</Link>
         </div>
       </main>
