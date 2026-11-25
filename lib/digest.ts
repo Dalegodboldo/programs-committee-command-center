@@ -84,8 +84,9 @@ export function buildDigest(opts: { person: Row; actions: Row[]; meetings: Row[]
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f8;padding:24px 12px"><tr><td align="center">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:18px;overflow:hidden">
     <tr><td style="background:#1b2a4a;padding:18px 24px;color:#ffffff">
-      <div style="font-size:16px;font-weight:700">Programs Committee</div>
-      <div style="font-size:13px;color:#e8a33d">Your week · ${esc(longNice(today))}</div>
+      <div style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#cbd5e1">Always In The Club</div>
+      <div style="margin-top:2px;font-size:18px;font-weight:700">Programs Committee</div>
+      <div style="margin-top:2px;font-size:13px;color:#e8a33d">Your week · ${esc(longNice(today))}</div>
     </td></tr>
     <tr><td style="padding:22px 24px 28px">
       <p style="margin:0;font-size:16px;color:#0f172a">Hi ${esc(first)},</p>
