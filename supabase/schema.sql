@@ -293,7 +293,7 @@ create table if not exists public.documents (
   name text not null,
   folder text not null default 'unfiled' check (folder in (
     'committee', 'plans', 'spotlight', 'releases', 'mentoring', 'safeguarding', 'screening', 'partners',
-    'grants', 'florida', 'showcases', 'marketing', 'templates', 'admin', 'unfiled')),
+    'grants', 'florida', 'showcases', 'marketing', 'templates', 'admin', 'unfiled', 'playground')),
   storage_path text not null unique,
   size_bytes bigint,
   doc_year int default extract(year from now())::int,
@@ -456,7 +456,7 @@ end $$;
 create or replace function public.doc_folder_visible(f text)
 returns boolean language sql stable as $$
   select case
-    when f in ('releases', 'spotlight', 'mentoring') then public.is_editor()
+    when f in ('releases', 'spotlight', 'mentoring', 'playground') then public.is_editor()
     when f in ('screening', 'admin') then public.my_role() = 'admin'
     else public.is_member()
   end;

@@ -80,6 +80,7 @@ export const DOC_FOLDERS = [
   { value: 'partners', label: 'Partners & Schools', icon: '🏫', hint: 'Partner agreements, MOUs, program info from schools', access: 'everyone' },
   { value: 'grants', label: 'Grants & Funding', icon: '🏛️', hint: 'Applications, award letters, grant reports, sponsor decks', access: 'everyone' },
   { value: 'florida', label: 'Florida Provider', icon: '🌴', hint: 'Provider application, certificate of use, class syllabi', access: 'everyone' },
+  { value: 'playground', label: 'Playground Scholarship', icon: '🎓', hint: 'Scholarship details, applications, selections, Playground correspondence', access: 'team' },
   { value: 'showcases', label: 'Showcases & Events', icon: '🎭', hint: 'Spotlight Live plans, run of show, venue agreements', access: 'everyone' },
   { value: 'marketing', label: 'Marketing & Social', icon: '📣', hint: 'Logos, post templates, one-sheets, press', access: 'everyone' },
   { value: 'templates', label: 'Templates & Forms', icon: '📋', hint: 'Blank intake form, release form, outreach scripts', access: 'everyone' },
