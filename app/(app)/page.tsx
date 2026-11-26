@@ -7,7 +7,7 @@ import { visibleLinks } from '@/lib/nav';
 import { arrangeLinks } from '@/lib/settings';
 import { useSettings } from '@/components/SettingsContext';
 import Icon from '@/components/Icon';
-import { Avatar, Chip, DueChip, SectionIcon, WorkstreamChip } from '@/components/ui';
+import { Chip, DueChip, SectionIcon, WorkstreamChip } from '@/components/ui';
 import { firstName, sectionStyle, workstreamTone } from '@/lib/colors';
 import { addDays, daysUntil, longDate, today } from '@/lib/dates';
 import type { Row } from '@/lib/types';
@@ -23,7 +23,6 @@ export default function Overview() {
   const questions = useLiveTable('open_questions', { orderBy: 'sort_order' });
   const partners = useLiveTable('partners', { orderBy: 'next_step_date' });
   const grants = useLiveTable('grants', { orderBy: 'deadline' });
-  const activity = useLiveTable('activity_log', { orderBy: 'created_at', ascending: false, limit: 12 });
 
   const t = today();
   const weekOut = addDays(t, 7);
@@ -70,7 +69,6 @@ export default function Overview() {
     }, {}),
   ).sort((a, b) => b[1].total - a[1].total);
 
-  const recent = [...activity.rows].sort((a, b) => (a.created_at < b.created_at ? 1 : -1)).slice(0, 8);
   const hour = new Date().getHours();
   const hello = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
   const todayLabel = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
@@ -113,26 +111,27 @@ export default function Overview() {
         </div>
 
         <div className="card">
-          <div className="mb-3 flex items-center justify-between gap-2">
-            <h2 className="font-bold">December scorecard</h2>
-            <Link href="/plan"><Chip cls="bg-teal-100 text-teal-800">{scoreDone} of {scorecard.length} met</Chip></Link>
-          </div>
-          <ul className="space-y-2.5 text-sm">
-            {scorecard.map((g) => {
-              const met = goalMet(g);
-              const target = g.target_value != null ? Number(g.target_value) : null;
-              const current = Number(g.current_value ?? 0);
-              const pct = met ? 100 : target ? Math.min(100, Math.round((current / target) * 100)) : 0;
-              return (
-                <li key={g.id} className="grid grid-cols-[minmax(0,1fr)_80px_52px] items-center gap-3">
-                  <span className={`truncate ${met ? 'text-slate-400 line-through' : ''}`} title={g.title}>{g.title}</span>
-                  <span className="h-2 overflow-hidden rounded-full bg-slate-100"><span className={`block h-full rounded-full ${met ? 'bg-green-500' : 'bg-teal-500'}`} style={{ width: `${pct}%` }} /></span>
-                  <span className={`text-right text-xs font-semibold ${met ? 'text-green-700' : 'text-slate-500'}`}>{met ? 'Met' : target != null ? `${current} / ${target}` : 'Not yet'}</span>
-                </li>
-              );
-            })}
-            {scorecard.length === 0 && <li className="text-slate-400">No scorecard yet.</li>}
-          </ul>
+          <h2 className="mb-3 font-bold">Workstreams</h2>
+          {streams.length === 0 ? (
+            <p className="text-sm text-slate-500">No action items yet.</p>
+          ) : (
+            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+              {streams.map(([name, s]) => {
+                const tone = workstreamTone(name);
+                return (
+                  <Link key={name} href={`/actions?stream=${encodeURIComponent(name)}`} className={`block rounded-xl p-3 hover:brightness-[0.97] ${tone.tile}`}>
+                    <div className="flex items-baseline justify-between gap-1">
+                      <span className="truncate text-sm font-bold">{name}</span>
+                      <span className="text-xs font-semibold">{s.done}/{s.total}</span>
+                    </div>
+                    <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-white/80">
+                      <div className={`h-full rounded-full ${tone.bar}`} style={{ width: `${s.total ? Math.round((s.done / s.total) * 100) : 0}%` }} />
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
     ),
@@ -234,49 +233,28 @@ export default function Overview() {
     ),
 
     progress: (
-      <section className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+      <section>
         <div className="card">
-          <h2 className="mb-3 font-bold">Workstreams</h2>
-          {streams.length === 0 ? (
-            <p className="text-sm text-slate-500">No action items yet.</p>
-          ) : (
-            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
-              {streams.map(([name, s]) => {
-                const tone = workstreamTone(name);
-                return (
-                  <Link key={name} href={`/actions?stream=${encodeURIComponent(name)}`} className={`block rounded-xl p-3 hover:brightness-[0.97] ${tone.tile}`}>
-                    <div className="flex items-baseline justify-between gap-1">
-                      <span className="truncate text-sm font-bold">{name}</span>
-                      <span className="text-xs font-semibold">{s.done}/{s.total}</span>
-                    </div>
-                    <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-white/80">
-                      <div className={`h-full rounded-full ${tone.bar}`} style={{ width: `${s.total ? Math.round((s.done / s.total) * 100) : 0}%` }} />
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        <div className="card">
-          <h2 className="mb-3 font-bold">Recent activity</h2>
-          {recent.length === 0 ? (
-            <p className="text-sm text-slate-500">Changes will appear here as they happen.</p>
-          ) : (
-            <ul className="space-y-3.5">
-              {recent.map((a) => (
-                <li key={a.id} className="flex items-start gap-3">
-                  <Avatar name={a.actor_name ?? 'System'} size="h-8 w-8 text-[11px]" />
-                  <div className="min-w-0 flex-1 text-sm leading-snug">
-                    <span className="font-semibold">{a.actor_name ?? 'System'}</span> {verb(a.action)} {noun(a.table_name)}
-                    {a.summary ? <span className="font-medium text-slate-700"> “{a.summary}”</span> : null}
-                    <div className="text-xs text-slate-500">{new Date(a.created_at).toLocaleString([], { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</div>
-                  </div>
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <h2 className="font-bold">December scorecard</h2>
+            <Link href="/plan"><Chip cls="bg-teal-100 text-teal-800">{scoreDone} of {scorecard.length} met</Chip></Link>
+          </div>
+          <ul className="grid grid-cols-1 gap-x-10 gap-y-2.5 text-sm lg:grid-cols-2">
+            {scorecard.map((g) => {
+              const met = goalMet(g);
+              const target = g.target_value != null ? Number(g.target_value) : null;
+              const current = Number(g.current_value ?? 0);
+              const pct = met ? 100 : target ? Math.min(100, Math.round((current / target) * 100)) : 0;
+              return (
+                <li key={g.id} className="grid grid-cols-[minmax(0,1fr)_110px_52px] items-center gap-3">
+                  <span className={`truncate ${met ? 'text-slate-400 line-through' : ''}`} title={g.title}>{g.title}</span>
+                  <span className="h-2 overflow-hidden rounded-full bg-slate-100"><span className={`block h-full rounded-full ${met ? 'bg-green-500' : 'bg-teal-500'}`} style={{ width: `${pct}%` }} /></span>
+                  <span className={`text-right text-xs font-semibold ${met ? 'text-green-700' : 'text-slate-500'}`}>{met ? 'Met' : target != null ? `${current} / ${target}` : 'Not yet'}</span>
                 </li>
-              ))}
-            </ul>
-          )}
+              );
+            })}
+            {scorecard.length === 0 && <li className="text-slate-400">No scorecard yet.</li>}
+          </ul>
         </div>
       </section>
     ),
@@ -349,12 +327,3 @@ function MiniStat({ href, value, label, cls }: { href: string; value: number; la
     </Link>
   );
 }
-
-const verb = (a: string) => ({ insert: 'added', update: 'updated', delete: 'removed' } as Record<string, string>)[a] ?? a;
-const noun = (t: string) =>
-  ({
-    meetings: 'a meeting', action_items: 'an action item', decisions: 'a decision', open_questions: 'an open question', goals: 'a goal',
-    spotlight_artists: 'a Spotlight artist', content_posts: 'a Spotlight post', mentors: 'a mentor', mentees: 'a mentee',
-    mentoring_sessions: 'a mentoring session', partners: 'a partner', grants: 'a grant', provider_classes: 'a Florida class', documents: 'a document',
-    doc_subfolders: 'a folder', app_settings: 'the app design', weekly_email: 'the weekly email',
-  } as Record<string, string>)[t] ?? t;

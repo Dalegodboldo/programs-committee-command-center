@@ -19,10 +19,10 @@ export type Settings = {
 };
 
 export const OVERVIEW_BLOCKS = [
-  { key: 'meeting', label: 'Next meeting and December scorecard' },
+  { key: 'meeting', label: 'Next meeting and Workstreams' },
   { key: 'stats', label: 'Numbers row (open, overdue, due soon, questions)' },
   { key: 'lists', label: 'My action items and Coming up' },
-  { key: 'progress', label: 'Progress by workstream and Recent activity' },
+  { key: 'progress', label: 'December scorecard' },
 ] as const;
 
 export const DEFAULT_SETTINGS: Settings = {
